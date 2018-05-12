@@ -5,7 +5,10 @@
     <!--游戏主面板-->
     <div class="main-content">
       <!--游戏地图-->
-      <div class="game-map"></div>
+      <div class="game-map">
+        <div class="enemy" v-for="enemy in enemyNum"></div>
+
+      </div>
       <!--player-->
       <Ball class="ball-body"></Ball>
     </div>
@@ -24,6 +27,9 @@
 
 <script>
 import Ball from './components/ball.vue';
+import $ from './util/util.js';
+import Enemy from './class/enemy.js';
+import Config from './util/config.js';
 export default {
   components: {
     Ball
@@ -33,7 +39,9 @@ export default {
       isleft: false,
       isright: false,
       istop: false,
-      isbottom: false
+      isbottom: false,
+      enemys: [],
+      enemyNum: Config.enemyNum
     }
   },
   methods: {
@@ -74,32 +82,71 @@ export default {
     //游戏初始化函数
     moveInit() {
       const map = document.querySelector('.game-map');
+      const speed = Config.playerSpeed;
       setInterval(() => {
         if (this.isleft) {
-          if (map.offsetLeft >= -5000) {
-            map.style.left = map.offsetLeft - 5 + 'px';
-          }
+          // if (map.offsetLeft >= -5000) {
+          //
+          // }
+          map.style.left = map.offsetLeft - speed + 'px';
         } else if (this.isbottom) {
-          if (map.offsetTop >= -5000) {
-            map.style.top = map.offsetTop - 5 + 'px';
-          }
+          // if (map.offsetTop >= -5000) {
+          //
+          // }
+          map.style.top = map.offsetTop - speed + 'px';
         } else if (this.istop) {
-          if (map.offsetTop <= -1) {
-            map.style.top = map.offsetTop + 5 + 'px';
-          }
+          // if (map.offsetTop <= -1) {
+          //
+          // }
+          map.style.top = map.offsetTop + speed + 'px';
         } else if (this.isright) {
-          if (map.offsetLeft <= -1) {
-            map.style.left = map.offsetLeft + 5 + 'px';
-          }
+          // if (map.offsetLeft <= -1) {
+          //
+          // }
+          map.style.left = map.offsetLeft + speed + 'px';
         }
+      }, 20)
+    },
+    //敌人初始化函数
+    initEnemy() {
+      const enemies = document.getElementsByClassName('enemy');
+      console.log(enemies.length);
+
+      for (let i = 0; i < enemies.length; i++) {
+
+        this.enemys.push(new Enemy(i, enemies[i], $.getRandom(), $.getRandom(), Config.enemySpeed));
+
+
+      }
+
+    },
+    //将所有敌人位置初始化
+    placeEnemy() {
+
+      this.enemys.forEach(enemy => {
+        enemy.element.style.left = enemy.x + 'px';
+        enemy.element.style.top = enemy.y + 'px';
+      });
+
+    },
+    mainLoop() {
+      const mainTimer = setInterval(() => {
+        this.enemys.forEach((enemy) => {
+          enemy.move();
+        });
+        this.placeEnemy();
       }, 20)
     }
   },
   mounted() {
     //do something after mounting vue instance
+    this.initEnemy();
+    this.placeEnemy();
     this.moveInit();
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
+    this.mainLoop();
+
   }
 }
 </script>
@@ -145,7 +192,17 @@ body {
   background: url(./assets/background.jpg);
   left: 0px;
   top: 0px;
+  border: 1px solid red;
 }
+
+.enemy {
+  width: 48px;
+  height: 48px;
+  background: url(./assets/enemy.png);
+  position: absolute;
+}
+
+
 
 .ball-body {
   position: absolute;
