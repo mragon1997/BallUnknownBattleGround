@@ -6,7 +6,12 @@
     <div class="main-content">
       <!--游戏地图-->
       <div class="game-map">
+        <!--敌人-->
         <div class="enemy" v-for="enemy in enemyNum"></div>
+        <!--子弹-->
+        <div class="bullet" v-for="bullet in bulletNum">
+          <img src="./assets/bullet.png" alt="">
+        </div>
 
       </div>
       <!--player-->
@@ -29,22 +34,36 @@
 import Ball from './components/ball.vue';
 import $ from './util/util.js';
 import Enemy from './class/enemy.js';
+import Bullet from './class/bullet.js';
 import Config from './util/config.js';
+
 export default {
   components: {
     Ball
   },
   data() {
     return {
+      player_x: 276,
+      player_y: 276,
       isleft: false,
       isright: false,
       istop: false,
       isbottom: false,
+      isClick: false,
       enemys: [],
+      bullets: [],
+      bulletNum: 1,
       enemyNum: Config.enemyNum
     }
   },
   methods: {
+    handleClick(e) {
+      this.bulletNum++;
+      const bullet = document.querySelector('.bullet:last-child');
+      const newbullet = new Bullet(this.bulletNum - 1, bullet, this.player_x + 16, this.player_y + 16, e.offsetX, e.offsetY);
+      newbullet.place();
+      this.bullets.push(newbullet);
+    },
     handleKeydown(e) {
       switch (e.keyCode) {
         case 87:
@@ -89,22 +108,27 @@ export default {
           //
           // }
           map.style.left = map.offsetLeft - speed + 'px';
+          this.player_x += speed;
         } else if (this.isbottom) {
           // if (map.offsetTop >= -5000) {
           //
           // }
           map.style.top = map.offsetTop - speed + 'px';
+          this.player_y += speed;
         } else if (this.istop) {
           // if (map.offsetTop <= -1) {
           //
           // }
           map.style.top = map.offsetTop + speed + 'px';
+          this.player_y -= speed;
         } else if (this.isright) {
           // if (map.offsetLeft <= -1) {
           //
           // }
           map.style.left = map.offsetLeft + speed + 'px';
+          this.player_x -= speed;
         }
+
       }, 20)
     },
     //敌人初始化函数
@@ -114,8 +138,7 @@ export default {
 
       for (let i = 0; i < enemies.length; i++) {
 
-        this.enemys.push(new Enemy(i, enemies[i], $.getRandom(), $.getRandom(), Config.enemySpeed));
-
+        this.enemys.push(new Enemy(i, enemies[i], $.getRandom(), $.getRandom()));
 
       }
 
@@ -129,22 +152,33 @@ export default {
       });
 
     },
+    placeBullet() {
+      this.bullets.forEach(bullet => {
+        bullet.place();
+      })
+    },
     mainLoop() {
       const mainTimer = setInterval(() => {
         this.enemys.forEach((enemy) => {
           enemy.move();
         });
+        this.bullets.forEach((bullet) => {
+          bullet.move();
+        });
+        this.placeBullet();
         this.placeEnemy();
       }, 20)
     }
   },
   mounted() {
     //do something after mounting vue instance
+    const map = document.querySelector('.game-map');
     this.initEnemy();
     this.placeEnemy();
     this.moveInit();
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
+    map.addEventListener('click', this.handleClick);
     this.mainLoop();
 
   }
@@ -192,7 +226,6 @@ body {
   background: url(./assets/background.jpg);
   left: 0px;
   top: 0px;
-  border: 1px solid red;
 }
 
 .enemy {
@@ -202,7 +235,19 @@ body {
   position: absolute;
 }
 
+.bullet {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  left: 20px;
+  top: 20px;
+}
 
+
+.bullet img {
+  width: 16px;
+  height: 16px;
+}
 
 .ball-body {
   position: absolute;

@@ -2,12 +2,12 @@ import Config from '../util/config.js';
 
 class Enemy {
   //构造函数
-  constructor(eid, element, x, y, speed) {
+  constructor(eid, element, x, y) {
     this.eid = eid;
     this.element = element;
     this.x = x;
     this.y = y;
-    this.speed = speed;
+    this.speed = Config.enemySpeed;
     this.xd = Math.random() > 0.5;
     this.yd = Math.random() > 0.5;
   }
