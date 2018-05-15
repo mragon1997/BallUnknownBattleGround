@@ -27,11 +27,19 @@ class Bullet {
   move() {
     const speed = this.bullet_speed;
     const rate = this.getSpeedRate();
+    let xspeed, yspeed;
     //由勾股定理得x*x+y*y=speed*speed
     //y/x=rate
     //x方向的速度 = speed*speed/(1+rate*rate)
-    const xspeed = Math.sqrt(speed * speed / (1 + rate * rate));
-    const yspeed = xspeed * rate;
+    if (rate == 'Infinity') {
+      //当目标方向为正上方时
+      yspeed = speed;
+      xspeed = 0;
+    } else {
+      xspeed = Math.sqrt(speed * speed / (1 + rate * rate));
+      yspeed = xspeed * rate;
+    }
+
     if (this.target_x > this.start_x) {
       this.x += xspeed;
     } else {

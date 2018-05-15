@@ -1,6 +1,12 @@
 const Util = {
   getRandom() {
     return Math.floor(Math.random() * 5000);
+  },
+  toDeg(rad) {
+    return 180 / Math.PI * rad;
+  },
+  toRad(deg) {
+    return Math.PI / 180 * deg;
   }
 }
 

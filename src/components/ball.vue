@@ -1,6 +1,7 @@
 <template lang="html">
  <div>
-  <img src="../assets/ball.png" alt="">
+  <img src="../assets/pipe.png" class="ball_pipe">
+  <img src="../assets/ball.png" class="ball_body">
  </div>
 
 </template>
@@ -12,7 +13,6 @@ export default {
 </script>
 
 <style lang="css">
-img{
- width: 48px;
-}
+
+
 </style>
