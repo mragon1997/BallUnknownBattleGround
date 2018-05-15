@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+
+<body>
+  <div id="app">
+    <img :src="playerImg" id="ee">
+    <button @click="handleClick">11</button>
+  </div>
+
+
+
+  <script src="https://cdn.bootcss.com/vue/2.5.17-beta.0/vue.min.js"></script>
+  <script type="text/javascript">
+    var app = new Vue({
+      el: '#app',
+      data: {
+        playerImg: './assets/ball.png',
+        enemyImg: './assets/enemy.png'
+      },
+      methods: {
+        handleClick() {
+          const ii = document.querySelector('#ee');
+          this.playerImg = './assets/enemy.png';
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>

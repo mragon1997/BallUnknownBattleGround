@@ -7,7 +7,10 @@
       <!--游戏地图-->
       <div class="game-map">
         <!--敌人-->
-        <div class="enemy" v-for="enemy in enemyNum"></div>
+        <div class="enemy" v-for="enemy in enemys">
+          <img src="./assets/enemy.png" v-show="enemy.state=='alive'">
+          <img src="./assets/ball.png" v-show="enemy.state=='death'">
+        </div>
         <!--子弹-->
         <div class="bullet" v-for="bullet in bulletNum">
 
@@ -40,6 +43,10 @@ import Enemy from './class/enemy.js';
 import Bullet from './class/bullet.js';
 import Config from './util/config.js';
 
+
+
+
+
 export default {
   data() {
     return {
@@ -59,6 +66,10 @@ export default {
     }
   },
   methods: {
+    returnState(state) {
+      return this.StateImg['alive'];
+
+    },
     computePosition() {
       //将炮筒角度转换为弧度制
       const rad = Math.PI / 180 * this.pipe_angle;
@@ -66,7 +77,6 @@ export default {
       const target_x = this.player_x + Math.floor(this.player_range * Math.cos(rad));
       //计算目标的位置的y坐标
       const target_y = this.player_y + Math.floor(this.player_range * Math.sin(rad));
-
       return [target_x, target_y];
     },
     rotatePipe(n) {
@@ -173,11 +183,11 @@ export default {
     },
     //敌人初始化函数
     initEnemy() {
-      const enemies = document.getElementsByClassName('enemy');
 
-      for (let i = 0; i < enemies.length; i++) {
 
-        this.enemys.push(new Enemy(i, enemies[i], $.getRandom(), $.getRandom()));
+      for (let i = 0; i < this.enemyNum; i++) {
+
+        this.enemys.push(new Enemy(i, $.getRandom(), $.getRandom()));
 
       }
 
@@ -186,8 +196,8 @@ export default {
     placeEnemy() {
 
       this.enemys.forEach(enemy => {
-        enemy.element.style.left = enemy.x + 'px';
-        enemy.element.style.top = enemy.y + 'px';
+        enemy.element.style.left = enemy.x - 24 + 'px';
+        enemy.element.style.top = enemy.y - 24 + 'px';
       });
 
     },
@@ -210,15 +220,23 @@ export default {
     }
   },
   mounted() {
+
     //do something after mounting vue instance
     const map = document.querySelector('.game-map');
     this.initEnemy();
-    this.placeEnemy();
-    this.moveInit();
-    document.addEventListener('keydown', this.handleKeydown);
-    document.addEventListener('keyup', this.handleKeyup);
-    this.mainLoop();
+    this.$nextTick(() => {
+      const enemies = document.querySelectorAll('.enemy');
+      console.log(enemies);
+      this.enemys.forEach((enemy, index) => {
+        enemy.element = enemies[index];
 
+      });
+      this.placeEnemy();
+      this.moveInit();
+      document.addEventListener('keydown', this.handleKeydown);
+      document.addEventListener('keyup', this.handleKeyup);
+      this.mainLoop();
+    });
   }
 }
 </script>
@@ -269,7 +287,6 @@ body {
 .enemy {
   width: 48px;
   height: 48px;
-  background: url(./assets/enemy.png);
   position: absolute;
 }
 
