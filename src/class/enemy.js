@@ -15,22 +15,24 @@ class Enemy {
   //敌人的移动
   move() {
 
-    if (Math.random() < Config.enemyTurn) {
-      this.xd = !this.xd;
-    }
-    if (Math.random() < Config.enemyTurn) {
-      this.yd = !this.yd;
-    }
-    if (this.xd) {
-      this.x += this.speed;
-    } else {
-      this.x -= this.speed;
-    }
+    if (this.state === 'alive') {
+      if (Math.random() < Config.enemyTurn) {
+        this.xd = !this.xd;
+      }
+      if (Math.random() < Config.enemyTurn) {
+        this.yd = !this.yd;
+      }
+      if (this.xd) {
+        this.x += this.speed;
+      } else {
+        this.x -= this.speed;
+      }
 
-    if (this.yd) {
-      this.y += this.speed;
-    } else {
-      this.y -= this.speed;
+      if (this.yd) {
+        this.y += this.speed;
+      } else {
+        this.y -= this.speed;
+      }
     }
   }
 }

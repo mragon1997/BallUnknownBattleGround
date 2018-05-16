@@ -9,11 +9,10 @@
         <!--敌人-->
         <div class="enemy" v-for="enemy in enemys">
           <img src="./assets/enemy.png" v-show="enemy.state=='alive'">
-          <img src="./assets/ball.png" v-show="enemy.state=='death'">
+          <img src="./assets/box.png" v-show="enemy.state=='death'">
         </div>
         <!--子弹-->
         <div class="bullet" v-for="bullet in bulletNum">
-
           <img src="./assets/bullet.png">
         </div>
       </div>
@@ -56,7 +55,6 @@ export default {
       isright: false, //是否向右运动
       istop: false, //是否向上运动
       isbottom: false, //是否向下运动
-      isshot: false,
       enemys: [], //保存所有敌人的数组
       bullets: [], //保存所有子弹的数组
       pipe_angle: -90, //炮筒默认的角度
@@ -68,6 +66,33 @@ export default {
   methods: {
     returnState(state) {
       return this.StateImg['alive'];
+    },
+    checkImpact() {
+      this.bullets.forEach(bullet => {
+        const bullet_x = bullet.x; //子弹当前的x坐标
+        const bullet_y = bullet.y; //子弹当前的y坐标
+        this.enemys.forEach(enemy => {
+          const enemy_edge_left = enemy.x - 32; //敌人的左边界
+          const enemy_edge_right = enemy.x + 32; //敌人的右边界
+          const enemy_edge_top = enemy.y - 32; //敌人的上边界
+          const enemy_edge_bottom = enemy.y + 32; //敌人的下边界
+          if (bullet_x > enemy_edge_left && bullet_x < enemy_edge_right && bullet_y > enemy_edge_top && bullet_y < enemy_edge_bottom && enemy.state != 'dispear') {
+            enemy.state = 'death';
+          }
+
+        })
+      });
+    },
+    checkPickup() {
+      const x = this.player_x;
+      const y = this.player_y;
+      this.enemys.forEach(target => {
+        const distance = Math.sqrt((y - target.y) * (y - target.y) + (x - target.x) * (x - target.x));
+        if (distance < 48 && target.state == 'death') {
+          target.state = 'dispear';
+        }
+      });
+
 
     },
     computePosition() {
@@ -216,6 +241,8 @@ export default {
         });
         this.placeBullet();
         this.placeEnemy();
+        this.checkImpact();
+        this.checkPickup();
       }, 20)
     }
   },
