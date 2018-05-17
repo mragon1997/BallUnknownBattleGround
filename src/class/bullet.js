@@ -1,45 +1,48 @@
+import Substance from './substance.js';
 import Config from '../util/config.js';
 
+// Bullet类表示游戏中的子弹
+// 继承自Substance类
+// 特有的属性包括:
+//  speed:Number类型,表示子弹运动的速率
+//  start_x:Number类型,表示子弹运动起点的x坐标
+//  start_y:Number类型,表示子弹运动起点的y坐标
+//  target_x:Number类型,表示子弹运动终点的x坐标
+//  target_y:Number类型,表示子弹运动终点的y坐标
 
-//子弹类
-class Bullet {
-  constructor(bid, element, start_x, start_y, target_x, target_y) {
-    this.element = element;
-    this.x = start_x; //子弹当前的x坐标，初始值为起点坐标
-    this.y = start_y; //子弹当前的y坐标，初始值为起点坐标
-    this.start_x = start_x; //子弹运动起点的x坐标
-    this.start_y = start_y; //子弹运动起点的y坐标
-    this.target_x = target_x; //子弹运动目标的x坐标
-    this.target_y = target_y; //子弹运动目标的y坐标
-    this.bullet_speed = Config.bulletSpeed; //子弹的运动速率
+class Bullet extends Substance {
+  constructor(start_x, start_y, target_x, target_y) {
+    this.speed = Config.bulletSpeed;
+    this.start_x = start_x;
+    this.start_y = start_y;
+    this.target_x = target_x;
+    this.target_y = target_y;
   }
 
-  place() {
-    this.element.style.left = this.x + 'px';
-    this.element.style.top = this.y + 'px';
-  }
-
-  //计算子弹x轴与y轴速率的比例
-  getSpeedRate() {
-    return Math.abs((this.target_y - this.start_y) / (this.target_x - this.start_x));
-  }
-  //运动方法
+  //子弹运动方法
   move() {
+    //子弹运动的思路是:
+    //子弹运动的速率固定不变
+    //根据子弹x轴方向和y轴方向的速度不同调控子弹的运动方向
     const speed = this.bullet_speed;
-    const rate = this.getSpeedRate();
+    //根据子弹起点坐标和终点左边推算出子弹x轴速度和y轴速度的比率
+    const rate = Math.abs((this.target_y - this.start_y) / (this.target_x - this.start_x));
     let xspeed, yspeed;
-    //由勾股定理得x*x+y*y=speed*speed
-    //y/x=rate
-    //x方向的速度 = speed*speed/(1+rate*rate)
+
     if (rate == 'Infinity') {
       //当目标方向为正上方时
+      //子弹在x轴方向没有速度,y轴速度即等于子弹速度
       yspeed = speed;
       xspeed = 0;
     } else {
+      //由勾股定理得x*x+y*y=speed*speed
+      //y/x=rate
+      //x方向的速度 = speed*speed/(1+rate*rate)
       xspeed = Math.sqrt(speed * speed / (1 + rate * rate));
       yspeed = xspeed * rate;
     }
 
+    //根据速度来改变子弹的位置坐标
     if (this.target_x > this.start_x) {
       this.x += xspeed;
     } else {
