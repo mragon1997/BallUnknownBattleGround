@@ -67,8 +67,8 @@ export default {
     }
   },
   methods: {
-    returnState(state) {
-      return this.StateImg['alive'];
+    initPlayer() {
+
     },
     checkImpact() {
       this.bullets.forEach(bullet => {
@@ -211,8 +211,6 @@ export default {
     },
     //敌人初始化函数
     initEnemy() {
-
-
       for (let i = 0; i < this.enemyNum; i++) {
 
         this.enemys.push(new Enemy(i, $.getRandom(), $.getRandom()));

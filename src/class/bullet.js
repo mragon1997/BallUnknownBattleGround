@@ -4,6 +4,7 @@ import Config from '../util/config.js';
 // Bullet类表示游戏中的子弹
 // 继承自Substance类
 // 特有的属性包括:
+//  owner:Substance类型，表示子弹的拥有者,即发射子弹的物体
 //  speed:Number类型,表示子弹运动的速率
 //  start_x:Number类型,表示子弹运动起点的x坐标
 //  start_y:Number类型,表示子弹运动起点的y坐标
@@ -11,10 +12,14 @@ import Config from '../util/config.js';
 //  target_y:Number类型,表示子弹运动终点的y坐标
 
 class Bullet extends Substance {
-  constructor(start_x, start_y, target_x, target_y) {
+  constructor(owner = null, target_x = 0, target_y = 0) {
+    super();
+    this.owner = owner;
+    this.x = owner.x;
+    this.y = owner.y;
     this.speed = Config.bulletSpeed;
-    this.start_x = start_x;
-    this.start_y = start_y;
+    this.start_x = owner.x;
+    this.start_y = owner.y;
     this.target_x = target_x;
     this.target_y = target_y;
   }
