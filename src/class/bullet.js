@@ -12,40 +12,46 @@ import Config from '../util/config.js';
 //  target_y:Number类型,表示子弹运动终点的y坐标
 
 class Bullet extends Substance {
-  constructor(owner = null, target_x = 0, target_y = 0) {
+  constructor(owner = null) {
     super();
     this.owner = owner;
-    this.x = owner.x;
-    this.y = owner.y;
     this.speed = Config.bulletSpeed;
-    this.start_x = owner.x;
-    this.start_y = owner.y;
-    this.target_x = target_x;
-    this.target_y = target_y;
+    this.start_x = 0;
+    this.start_y = 0;
+    this.target_x = 0;
+    this.target_y = 0;
   }
-
   //子弹运动方法
   move() {
     //子弹运动的思路是:
     //子弹运动的速率固定不变
     //根据子弹x轴方向和y轴方向的速度不同调控子弹的运动方向
-    const speed = this.bullet_speed;
+    const speed = this.speed;
     //根据子弹起点坐标和终点左边推算出子弹x轴速度和y轴速度的比率
-    const rate = Math.abs((this.target_y - this.start_y) / (this.target_x - this.start_x));
-    let xspeed, yspeed;
 
-    if (rate == 'Infinity') {
-      //当目标方向为正上方时
-      //子弹在x轴方向没有速度,y轴速度即等于子弹速度
+    let xspeed, yspeed, rate;
+
+
+    if (this.target_x == this.start_x) {
       yspeed = speed;
       xspeed = 0;
+
     } else {
-      //由勾股定理得x*x+y*y=speed*speed
-      //y/x=rate
-      //x方向的速度 = speed*speed/(1+rate*rate)
+      rate = Math.abs((this.target_y - this.start_y) / (this.target_x - this.start_x));
       xspeed = Math.sqrt(speed * speed / (1 + rate * rate));
       yspeed = xspeed * rate;
     }
+
+    // if (rate == 'Infinity') {
+    //   //当目标方向为正上方时
+    //   //子弹在x轴方向没有速度,y轴速度即等于子弹速度
+    //
+    // } else {
+    //   //由勾股定理得x*x+y*y=speed*speed
+    //   //y/x=rate
+    //   //x方向的速度 = speed*speed/(1+rate*rate)
+    //
+    // }
 
     //根据速度来改变子弹的位置坐标
     if (this.target_x > this.start_x) {
@@ -58,7 +64,6 @@ class Bullet extends Substance {
     } else {
       this.y -= yspeed;
     }
-
   }
 }
 

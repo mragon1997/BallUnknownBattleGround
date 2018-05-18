@@ -1,5 +1,5 @@
 const Util = {
-  getRandom() {
+  getRandomPosition() {
     return Math.floor(Math.random() * 5000);
   },
   toDeg(rad) {

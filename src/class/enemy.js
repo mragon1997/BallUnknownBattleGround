@@ -1,5 +1,7 @@
 import Substance from './substance.js';
+import Ball from './ball.js';
 import Config from '../util/config.js';
+import $ from '../util/util.js';
 
 // Enemy类表示的是游戏中的敌人角色
 // 继承自Ball类
@@ -13,8 +15,11 @@ import Config from '../util/config.js';
 //  autoMove(): 用于让敌人在地图上自动移动
 
 class Enemy extends Ball {
-  constructor() {
+  constructor(name) {
     super();
+    this.x = $.getRandomPosition();
+    this.y = $.getRandomPosition();
+    this.name = name;
     this.x_direc = Math.random() > 0.5; //随机产生敌人的x轴初始运动方向
     this.y_direc = Math.random() > 0.5; //随机产生敌人的y轴初始运动方向
     this.turnDirec = Config.enemyTurnRate; //敌人更改运动方向的概率

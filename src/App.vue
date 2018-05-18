@@ -12,7 +12,7 @@
           <img src="./assets/box.png" v-show="enemy.state=='death'">
         </div>
         <!--子弹-->
-        <div class="bullet" v-for="bullet in bulletNum">
+        <div class="bullet" v-for="bullet in bullets">
           <img src="./assets/bullet.png">
         </div>
       </div>
@@ -38,9 +38,12 @@
 
 <script>
 import $ from './util/util.js';
+import Config from './util/config.js';
+import Player from './class/player.js';
+import Point from './class/point.js';
 import Enemy from './class/enemy.js';
 import Bullet from './class/bullet.js';
-import Config from './util/config.js';
+
 
 
 
@@ -52,78 +55,79 @@ import Config from './util/config.js';
 export default {
   data() {
     return {
-      player_x: 292, //玩家x坐标
-      player_y: 292, //玩家y坐标
-      isleft: false, //是否向左运动
-      isright: false, //是否向右运动
-      istop: false, //是否向上运动
-      isbottom: false, //是否向下运动
+      player: null, //当前游戏玩家
+      point: null, //地图标点
+      map: null, //游戏地图
       enemys: [], //保存所有敌人的数组
       bullets: [], //保存所有子弹的数组
-      pipe_angle: -90, //炮筒默认的角度
-      player_range: 200, //玩家的射程
-      bulletNum: 1, //游戏中子弹存在的数量
-      enemyNum: Config.enemyNum //生成敌人的数量
+      enemyNum: Config.enemyNum, //生成敌人的数量
+      isleft: false,
+      isright: false,
+      istop: false,
+      isbottom: false
     }
   },
   methods: {
     initPlayer() {
-
+      const p1 = new Player();
+      //初始化玩家的位置坐标
+      p1.x = 292;
+      p1.y = 292;
+      p1.speed = 4;
+      //初始化玩家对应的视图元素
+      p1.element = document.querySelector('.ball-body');
+      //将玩家放置到地图
+      p1.place();
+      //将p1设置为当前游戏玩家
+      this.player = p1;
     },
+    //初始化地图标点
+    initPoint() {
+      const point = new Point();
+      point.element = document.querySelector('.point');
+      point.computePosition(this.player);
+
+      this.point = point;
+    },
+    //初始化敌人
+    initEnemy() {
+      for (let i = 0; i < this.enemyNum; i++) {
+        this.enemys.push(new Enemy('enemy' + i));
+      }
+    },
+    //初始化子弹
+    initBullet() {
+      for (let i = 0; i < 100; i++) {
+        this.bullets.push(new Bullet(this.player));
+      }
+    },
+    //拾取检测
+    checkPickup() {
+      this.enemys.forEach(enemy => {
+        if (this.player.checkImpact(enemy) && enemy.state === 'death') enemy.state = 'dispear';
+      });
+    },
+    //射击检测
     checkImpact() {
       this.bullets.forEach(bullet => {
-        const bullet_x = bullet.x; //子弹当前的x坐标
-        const bullet_y = bullet.y; //子弹当前的y坐标
         this.enemys.forEach(enemy => {
-          const enemy_edge_left = enemy.x - 32; //敌人的左边界
-          const enemy_edge_right = enemy.x + 32; //敌人的右边界
-          const enemy_edge_top = enemy.y - 32; //敌人的上边界
-          const enemy_edge_bottom = enemy.y + 32; //敌人的下边界
-          if (bullet_x > enemy_edge_left && bullet_x < enemy_edge_right && bullet_y > enemy_edge_top && bullet_y < enemy_edge_bottom && enemy.state != 'dispear') {
+          if (bullet.checkImpact(enemy) && enemy.state != 'dispear') {
             enemy.state = 'death';
           }
-
-        })
+        });
       });
     },
-    checkPickup() {
-      const x = this.player_x;
-      const y = this.player_y;
-      this.enemys.forEach(target => {
-        const distance = Math.sqrt((y - target.y) * (y - target.y) + (x - target.x) * (x - target.x));
-        if (distance < 48 && target.state == 'death') {
-          target.state = 'dispear';
-        }
+    placeBullet() {
+      this.bullets.forEach(bullet => {
+        bullet.place();
+      })
+    },
+    placeEnemy() {
+      this.enemys.forEach(enemy => {
+        enemy.place();
       });
-
-
-    },
-    computePosition() {
-      //将炮筒角度转换为弧度制
-      const rad = Math.PI / 180 * this.pipe_angle;
-      //计算目标的位置的x坐标
-      const target_x = this.player_x + Math.floor(this.player_range * Math.cos(rad));
-      //计算目标的位置的y坐标
-      const target_y = this.player_y + Math.floor(this.player_range * Math.sin(rad));
-      return [target_x, target_y];
-    },
-    rotatePipe(n) {
-      const pipe = document.querySelector('.ball_pipe');
-      this.pipe_angle += n * Config.rotatePipeSpeed;
-
-      pipe.style.transform = 'rotate(' + this.pipe_angle + 'deg)';
-
-    },
-    shot() {
-      this.bulletNum++;
-      const bullet = document.querySelector('.bullet:last-child');
-      const target = this.computePosition();
-      const newbullet = new Bullet(this.bulletNum - 1, bullet, this.player_x, this.player_y, target[0], target[1]);
-      newbullet.place();
-      this.bullets.push(newbullet);
     },
     handleKeydown(e) {
-
       switch (e.keyCode) {
         case 87:
           this.istop = true;
@@ -138,13 +142,13 @@ export default {
           this.isleft = true;
           break;
         case 69:
-          this.rotatePipe(1);
+          this.player.rotatePipe(1);
           break;
         case 81:
-          this.rotatePipe(-1);
+          this.player.rotatePipe(-1);
           break;
         case 74:
-          this.shot();
+          this.player.attack();
           break;
         default:
       }
@@ -166,76 +170,37 @@ export default {
         default:
       }
     },
-    //游戏初始化函数
-    moveInit() {
+    //GameMap的初始化
+    initMap() {
       const map = document.querySelector('.game-map');
-      const speed = Config.playerSpeed;
+      const speed = this.player.speed;
+      //为了让玩家根据键盘按键流畅移动
+      //在地图中开始一个定时器，根据用户的按键状态让玩家坐标移动
+      //通过地图的相对移动展现出视角移动的效果
       setInterval(() => {
         if (this.isleft) {
-          // if (map.offsetLeft >= -5000) {
-          //
-          // }
           map.style.left = map.offsetLeft - speed + 'px';
-          this.player_x += speed;
+          this.player.x += speed;
         } else if (this.isbottom) {
-          // if (map.offsetTop >= -5000) {
-          //
-          // }
           map.style.top = map.offsetTop - speed + 'px';
-          this.player_y += speed;
+          this.player.y += speed;
         } else if (this.istop) {
-          // if (map.offsetTop <= -1) {
-          //
-          // }
           map.style.top = map.offsetTop + speed + 'px';
-          this.player_y -= speed;
+          this.player.y -= speed;
         } else if (this.isright) {
-          // if (map.offsetLeft <= -1) {
-          //
-          // }
           map.style.left = map.offsetLeft + speed + 'px';
-          this.player_x -= speed;
+          this.player.x -= speed;
         }
+        //根据游戏玩家的移动,改变地图标点的位置
+        this.point.computePosition(this.player);
 
-        this.movePoint();
-
-
-
-      }, 20)
+      }, 20);
     },
-    movePoint() {
-      const point = document.querySelector('.point');
-      point.style.left = Math.floor(this.player_x / 16) + 'px';
-      point.style.top = Math.floor(this.player_y / 16) + 'px';
 
-    },
-    //敌人初始化函数
-    initEnemy() {
-      for (let i = 0; i < this.enemyNum; i++) {
-
-        this.enemys.push(new Enemy(i, $.getRandom(), $.getRandom()));
-
-      }
-
-    },
-    //将所有敌人位置初始化
-    placeEnemy() {
-
-      this.enemys.forEach(enemy => {
-        enemy.element.style.left = enemy.x - 24 + 'px';
-        enemy.element.style.top = enemy.y - 24 + 'px';
-      });
-
-    },
-    placeBullet() {
-      this.bullets.forEach(bullet => {
-        bullet.place();
-      })
-    },
     mainLoop() {
       const mainTimer = setInterval(() => {
         this.enemys.forEach((enemy) => {
-          enemy.move();
+          enemy.autoMove();
         });
         this.bullets.forEach((bullet) => {
           bullet.move();
@@ -248,21 +213,26 @@ export default {
     }
   },
   mounted() {
-
     //do something after mounting vue instance
     const map = document.querySelector('.game-map');
+    this.initPlayer();
+    this.initPoint();
+    this.initMap();
+    //给document监听键盘事件,并设置对应的处理程序
+    document.addEventListener('keydown', this.handleKeydown);
+    document.addEventListener('keyup', this.handleKeyup);
     this.initEnemy();
+    this.initBullet();
     this.$nextTick(() => {
       const enemies = document.querySelectorAll('.enemy');
-      console.log(enemies);
+      const bullets = document.querySelectorAll('.bullet');
       this.enemys.forEach((enemy, index) => {
         enemy.element = enemies[index];
-
       });
-      this.placeEnemy();
-      this.moveInit();
-      document.addEventListener('keydown', this.handleKeydown);
-      document.addEventListener('keyup', this.handleKeyup);
+      this.bullets.forEach((bullet, index) => {
+        bullet.element = bullets[index];
+        this.player.bullets.push(bullet);
+      })
       this.mainLoop();
     });
   }
