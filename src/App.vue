@@ -24,6 +24,32 @@
     </div>
     <!--游戏侧边栏-->
     <div class="sidebar">
+      <!--通知栏-->
+      <div class="game-notice">
+
+      </div>
+      <!--玩家信息-->
+      <div class="player-info">
+
+        <p>
+          <i><img src="./assets/icon/player.png" alt=""></i> 玩家:{{player.name}}
+        </p>
+        <p>
+          <i><img src="./assets/icon/state.png" alt=""></i> 状态:{{player.state}}
+        </p>
+        <p>
+          <i><img src="./assets/icon/range.png" alt=""></i> 射程:{{player.range}}
+        </p>
+        <p>
+          <i><img src="./assets/icon/speed.png" alt=""></i> 速度:{{player.speed}}
+        </p>
+        <p>
+          生命值:{{player.hp}}
+        </p>
+        <p>
+          子弹数:{{player.bullets.length}}
+        </p>
+      </div>
       <!--小地图-->
       <div class="game-minimap">
         <div class="point"></div>
@@ -55,7 +81,9 @@ import Bullet from './class/bullet.js';
 export default {
   data() {
     return {
-      player: null, //当前游戏玩家
+      player: {
+        bullets: []
+      }, //当前游戏玩家
       point: null, //地图标点
       map: null, //游戏地图
       enemys: [], //保存所有敌人的数组
@@ -73,7 +101,8 @@ export default {
       //初始化玩家的位置坐标
       p1.x = 292;
       p1.y = 292;
-      p1.speed = 4;
+      // p1.name = 'cc';
+      p1.speed = Config.playerSpeed;
       //初始化玩家对应的视图元素
       p1.element = document.querySelector('.ball-body');
       //将玩家放置到地图
@@ -216,6 +245,7 @@ export default {
     //do something after mounting vue instance
     const map = document.querySelector('.game-map');
     this.initPlayer();
+    // console.log(this.player);
     this.initPoint();
     this.initMap();
     //给document监听键盘事件,并设置对应的处理程序
@@ -240,12 +270,18 @@ export default {
 </script>
 
 <style>
+p {
+  margin: 0;
+  padding: 0;
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
   height: 100%;
   font-size: 16px;
+  color: #444;
 
 }
 
@@ -263,9 +299,9 @@ body {
   width: 850px;
   height: 600px;
   margin: 20px auto;
-  background: #ccc;
   box-shadow: 2px 3px 3px #444;
   border-radius: 10px;
+  background: rgba(255, 255, 255, 0.4);
 
 }
 
@@ -274,9 +310,8 @@ body {
   height: 600px;
   float: left;
   position: relative;
-  background-position: 20px 10px;
   overflow: hidden;
-  border-radius: 10px 0 0 10px;
+  border-radius: 10px;
 }
 
 .game-map {
@@ -333,18 +368,35 @@ body {
   height: 600px;
   float: left;
   box-sizing: border-box;
-  background: #ede387;
-  border-radius: 0 10px 10px 0;
+  border-radius: 10px 10px 0 0;
+}
+
+.game-notice {
+  width: 250px;
+  height: 100px;
+}
+
+.player-info {
+  width: 230px;
+  height: 230px;
+  margin: 10px 10px;
+  font-size: 18px;
+  line-height: 25px;
+  padding: 25px;
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 2px 3px 3px #666;
 }
 
 .game-minimap {
-  width: 250px;
-  height: 250px;
+  width: 230px;
+  height: 230px;
+  margin: 20px 10px;
   box-sizing: border-box;
   position: relative;
-  background: url(./assets/mini-background.jpg);
-  background-size: cover;
-  border-radius: 0 10px 0 0;
+  background: url(./assets/ps_neutral.png);
+  border-radius: 10px;
 }
 
 .point {

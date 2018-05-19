@@ -16,7 +16,7 @@ class Ball extends Substance {
   constructor() {
     super();
     this.r = 24;
-    this.name = '';
+    this.name = 'ccc';
     this.state = 'alive';
     this.hp = 100;
     this.speed = Config.defaultSpeed;
