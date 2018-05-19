@@ -246,6 +246,7 @@ body {
   padding: 0;
   height: 100%;
   font-size: 16px;
+
 }
 
 .game {
@@ -254,7 +255,8 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: #ededed;
+  background: url(./assets/8.jpg);
+  background-size: cover;
 }
 
 .game-content {
@@ -262,6 +264,9 @@ body {
   height: 600px;
   margin: 20px auto;
   background: #ccc;
+  box-shadow: 2px 3px 3px #444;
+  border-radius: 10px;
+
 }
 
 .main-content {
@@ -271,13 +276,14 @@ body {
   position: relative;
   background-position: 20px 10px;
   overflow: hidden;
+  border-radius: 10px 0 0 10px;
 }
 
 .game-map {
   width: 4000px;
   height: 4000px;
   position: absolute;
-  background: url(./assets/background.jpg);
+  background: url(./assets/footer_lodyas.png);
   left: 0px;
   top: 0px;
 }
@@ -328,6 +334,7 @@ body {
   float: left;
   box-sizing: border-box;
   background: #ede387;
+  border-radius: 0 10px 10px 0;
 }
 
 .game-minimap {
@@ -337,6 +344,7 @@ body {
   position: relative;
   background: url(./assets/mini-background.jpg);
   background-size: cover;
+  border-radius: 0 10px 0 0;
 }
 
 .point {
