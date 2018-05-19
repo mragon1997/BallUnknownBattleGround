@@ -1,6 +1,6 @@
 const Util = {
   getRandomPosition() {
-    return Math.floor(Math.random() * 5000);
+    return Math.floor(24 + Math.random() * 3600);
   },
   toDeg(rad) {
     return 180 / Math.PI * rad;

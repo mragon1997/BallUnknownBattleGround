@@ -32,6 +32,13 @@ class Enemy extends Ball {
       if (Math.random() < this.turnDirec) this.x_direc = !this.x_direc;
       if (Math.random() < this.turnDirec) this.y_direc = !this.y_direc;
 
+
+      //到达地图边界时强制改变敌人运动方向
+      if (this.x <= 24) this.x_direc = true;
+      if (this.x >= 3662) this.x_direc = false;
+      if (this.y <= 24) this.y_direc = true;
+      if (this.y >= 3662) this.y_direc = false;
+
       //根据方向来确定敌人相应坐标的加减
       if (this.x_direc) {
         this.x += this.speed;

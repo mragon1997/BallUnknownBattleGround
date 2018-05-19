@@ -6,14 +6,16 @@
     <div class="main-content">
       <!--游戏地图-->
       <div class="game-map">
-        <!--敌人-->
-        <div class="enemy" v-for="enemy in enemys">
-          <img src="./assets/enemy.png" v-show="enemy.state=='alive'">
-          <img src="./assets/box.png" v-show="enemy.state=='death'">
-        </div>
-        <!--子弹-->
-        <div class="bullet" v-for="bullet in bullets">
-          <img src="./assets/bullet.png">
+        <div class="game-edge">
+          <!--敌人-->
+          <div class="enemy" v-for="enemy in enemys">
+            <img src="./assets/enemy.png" v-show="enemy.state=='alive'">
+            <img src="./assets/box.png" v-show="enemy.state=='death'">
+          </div>
+          <!--子弹-->
+          <div class="bullet" v-for="bullet in bullets">
+            <img src="./assets/bullet.png">
+          </div>
         </div>
       </div>
       <!--player-->
@@ -43,16 +45,18 @@
         <p>
           <i><img src="./assets/icon/speed.png" alt=""></i> 速度:{{player.speed}}
         </p>
+        <p>击杀:{{player.kill}}</p>
         <p>
           生命值:{{player.hp}}
+          <HealthBar :hp="player.hp"></HealthBar>
         </p>
         <p>
           子弹数:{{player.bullets.length}}
         </p>
       </div>
       <!--小地图-->
-      <div class="game-minimap">
-        <div class="point"></div>
+      <div class=" game-minimap ">
+        <div class="point "></div>
       </div>
     </div>
 
@@ -69,6 +73,7 @@ import Player from './class/player.js';
 import Point from './class/point.js';
 import Enemy from './class/enemy.js';
 import Bullet from './class/bullet.js';
+import HealthBar from './components/health.vue';
 
 
 
@@ -79,6 +84,9 @@ import Bullet from './class/bullet.js';
 
 
 export default {
+  components: {
+    HealthBar
+  },
   data() {
     return {
       player: {
@@ -126,7 +134,7 @@ export default {
     },
     //初始化子弹
     initBullet() {
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 300; i++) {
         this.bullets.push(new Bullet(this.player));
       }
     },
@@ -140,8 +148,12 @@ export default {
     checkImpact() {
       this.bullets.forEach(bullet => {
         this.enemys.forEach(enemy => {
-          if (bullet.checkImpact(enemy) && enemy.state != 'dispear') {
+          if (bullet.checkImpact(enemy) && enemy.state === 'alive') {
+
+            this.player.kill++;
+
             enemy.state = 'death';
+
           }
         });
       });
@@ -207,16 +219,16 @@ export default {
       //在地图中开始一个定时器，根据用户的按键状态让玩家坐标移动
       //通过地图的相对移动展现出视角移动的效果
       setInterval(() => {
-        if (this.isleft) {
+        if (this.isleft && this.player.x <= 3662) {
           map.style.left = map.offsetLeft - speed + 'px';
           this.player.x += speed;
-        } else if (this.isbottom) {
+        } else if (this.isbottom && this.player.y <= 3662) {
           map.style.top = map.offsetTop - speed + 'px';
           this.player.y += speed;
-        } else if (this.istop) {
+        } else if (this.istop && this.player.y >= 24) {
           map.style.top = map.offsetTop + speed + 'px';
           this.player.y -= speed;
-        } else if (this.isright) {
+        } else if (this.isright && this.player.x >= 24) {
           map.style.left = map.offsetLeft + speed + 'px';
           this.player.x -= speed;
         }
@@ -315,12 +327,21 @@ body {
 }
 
 .game-map {
-  width: 4000px;
-  height: 4000px;
+  width: 4280px;
+  height: 4280px;
   position: absolute;
   background: url(./assets/footer_lodyas.png);
-  left: 0px;
-  top: 0px;
+  left: -300px;
+  top: -300px;
+}
+
+.game-edge {
+  width: 3680px;
+  height: 3680px;
+  border: 3px dashed #ccc;
+  left: 300px;
+  top: 300px;
+  position: absolute;
 }
 
 .enemy {

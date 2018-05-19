@@ -12,6 +12,7 @@ import Ball from './ball.js';
 class Player extends Ball {
   constructor() {
     super();
+    this.kill = 0;
     this.shot_angle = Config.defaultShotAngle;
     this.rotate_Speed = Config.rotateSpeed;
   }
