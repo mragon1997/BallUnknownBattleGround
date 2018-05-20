@@ -1,4 +1,5 @@
 import Config from '../util/config.js';
+import List from '../util/supplylist.js';
 import Substance from './substance.js';
 
 // Ball类表示的游戏中的基本角色
@@ -9,9 +10,12 @@ import Substance from './substance.js';
 //  hp: Number类型，表示角色当前的生命值,当生命值小于等于0时，角色的状态切换为dead
 //  speed: Number类型,表示角色的移动速度，数值越大，角色移动速度越快
 //  range: Number类型,表示角色的射程，数值越大，角色发射的子弹的移动距离越远
+//  attackpower:Number类型,表示角色的攻击力，数值越大，命中敌人造成的伤害量越大
 //  bullets:Array类型,表示角色当前携带的子弹
+//  pack:Array类型,表示角色当前携带的补给物品
 // 特有的方法包括：
 //  shot(target_x,target_y):表示当前角色向目标发射子弹,参数target_x,表示目标的x轴坐标,target_y表示目标的y轴坐标
+//  pickup(supply):表示拾取补给,参数supply表示补给物品
 class Ball extends Substance {
   constructor() {
     super();
@@ -21,7 +25,11 @@ class Ball extends Substance {
     this.hp = 100;
     this.speed = Config.defaultSpeed;
     this.range = Config.defalutRange;
+    this.attackpower = Config.defaultAttackPower;
     this.bullets = [];
+    this.pack = [];
+    this.armor = 'normal';
+    this.armorValue = '0';
   }
   //发射子弹方法
   shot(target_x, target_y) {
@@ -33,6 +41,28 @@ class Ball extends Substance {
     bullet.start_y = this.y;
     bullet.target_x = target_x;
     bullet.target_y = target_y;
+  }
+
+  //拾取补给
+  pickup(supply) {
+
+    const specie = List.species[supply.name];
+    const num = List.num[supply.name];
+    if (specie === 'weapon') {
+      this.pack.push(supply);
+      this.attackpower = num;
+    } else if (specie === 'drug') {
+      if (this.hp + num >= 100) {
+        this.hp = 100;
+      } else {
+        this.hp += num;
+      }
+    } else if (specie === 'armor') {
+      this.pack.push(supply);
+      this.armor = supply.name;
+      this.armorValue = num;
+    }
+    supply.state = 'dispear';
   }
 
 }

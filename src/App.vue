@@ -9,8 +9,30 @@
         <div class="game-edge">
           <!--敌人-->
           <div class="enemy" v-for="enemy in enemys">
-            <img src="./assets/enemy.png" v-show="enemy.state=='alive'">
-            <img src="./assets/box.png" v-show="enemy.state=='death'">
+            <HealthBar :hp="enemy.hp" size="small" class="healthbar" v-show="enemy.state==='alive'"></HealthBar>
+            <img src="./assets/hulk.png" v-show="enemy.armorValue>0&&enemy.armor==='hulk'&&enemy.hp>0">
+            <img src="./assets/iron.png" v-show="enemy.armorValue>0&&enemy.armor==='iron'&&enemy.hp>0">
+            <img src="./assets/thor.png" v-show="enemy.armorValue>0&&enemy.armor==='thor'&&enemy.hp>0">
+            <img src="./assets/war.png" v-show="enemy.armorValue>0&&enemy.armor==='war'&&enemy.hp>0">
+            <img src="./assets/cap.png" v-show="enemy.armorValue>0&&enemy.armor==='cap'&&enemy.hp>0">
+            <img src="./assets/enemy.png" v-show="enemy.hp>0&&enemy.armorValue<=0">
+            <img src="./assets/box.png" v-show="enemy.hp<=0&&enemy.state==='death'">
+          </div>
+          <!--补给物品-->
+          <div class="supply" v-for="supply in supplys" v-show="supply.state ==='appear'">
+            <img src="./assets/pistol.png" v-if="supply.name==='psitol'">
+            <img src="./assets/ak47.png" v-if="supply.name==='ak47'">
+            <img src="./assets/beer.png" v-if="supply.name==='beer'">
+            <img src="./assets/pill.png" v-if="supply.name==='pill'">
+            <img src="./assets/cola.png" v-if="supply.name==='cola'">
+            <img src="./assets/cigarettes.png" v-if="supply.name==='cigarettes'">
+            <img src="./assets/thor.png" v-if="supply.name==='thor'">
+            <img src="./assets/war.png" v-if="supply.name==='war'">
+            <img src="./assets/hulk.png" v-if="supply.name==='hulk'">
+            <img src="./assets/iron.png" v-if="supply.name==='iron'">
+            <img src="./assets/cap.png" v-if="supply.name==='cap'">
+
+
           </div>
           <!--子弹-->
           <div class="bullet" v-for="bullet in bullets">
@@ -21,7 +43,12 @@
       <!--player-->
       <div class="ball-body">
         <img src="./assets/pipe.png" class="ball_pipe">
-        <img src="./assets/ball.png" class="ball_body">
+        <img src="./assets/ball.png" v-if="this.player.armor==='normal'" class="ball_body">
+        <img src="./assets/thor.png" v-if="this.player.armor==='thor'">
+        <img src="./assets/war.png" v-if="this.player.armor==='war'">
+        <img src="./assets/hulk.png" v-if="this.player.armor==='hulk'">
+        <img src="./assets/iron.png" v-if="this.player.armor==='iron'">
+        <img src="./assets/cap.png" v-if="this.player.armor==='cap'">
       </div>
     </div>
     <!--游戏侧边栏-->
@@ -40,15 +67,17 @@
           <i><img src="./assets/icon/state.png" alt=""></i> 状态:{{player.state}}
         </p>
         <p>
-          <i><img src="./assets/icon/range.png" alt=""></i> 射程:{{player.range}}
+          <i><img src="./assets/icon/range.png" alt=""></i> 击杀:{{player.kill}}
         </p>
         <p>
-          <i><img src="./assets/icon/speed.png" alt=""></i> 速度:{{player.speed}}
+          <i><img src="./assets/icon/speed.png" alt=""></i> 攻击:{{player.attackpower}}
         </p>
-        <p>击杀:{{player.kill}}</p>
         <p>
           生命值:{{player.hp}}
-          <HealthBar :hp="player.hp"></HealthBar>
+          <HealthBar :hp="player.hp" size="large"></HealthBar>
+        </p>
+        <p>
+          补给数:{{player.pack.length}}
         </p>
         <p>
           子弹数:{{player.bullets.length}}
@@ -73,6 +102,7 @@ import Player from './class/player.js';
 import Point from './class/point.js';
 import Enemy from './class/enemy.js';
 import Bullet from './class/bullet.js';
+import Supply from './class/supply.js';
 import HealthBar from './components/health.vue';
 
 
@@ -90,17 +120,22 @@ export default {
   data() {
     return {
       player: {
-        bullets: []
+        bullets: [],
+        pack: []
       }, //当前游戏玩家
       point: null, //地图标点
       map: null, //游戏地图
+      balls: [], //保存游戏中的所有角色
       enemys: [], //保存所有敌人的数组
       bullets: [], //保存所有子弹的数组
+      supplys: [], //保存地图中所有补给物品的数组
       enemyNum: Config.enemyNum, //生成敌人的数量
+      SupplyNum: Config.supplyNum, //生成补给物品的数量
       isleft: false,
       isright: false,
       istop: false,
       isbottom: false
+
     }
   },
   methods: {
@@ -117,6 +152,8 @@ export default {
       p1.place();
       //将p1设置为当前游戏玩家
       this.player = p1;
+      //将玩家加入到游戏的角色数组
+      this.balls.push(this.player);
     },
     //初始化地图标点
     initPoint() {
@@ -129,7 +166,21 @@ export default {
     //初始化敌人
     initEnemy() {
       for (let i = 0; i < this.enemyNum; i++) {
-        this.enemys.push(new Enemy('enemy' + i));
+        const enemy = new Enemy('enemy' + i);
+        this.enemys.push(enemy);
+        this.balls.push(enemy);
+      }
+    },
+    //初始化补给物品
+    initSupply() {
+      for (let i = 0; i < this.SupplyNum; i++) {
+        const supply = new Supply();
+        supply.name = $.getRandomSupply();
+        supply.r = 24;
+        supply.x = $.getRandomPosition();
+        supply.y = $.getRandomPosition();
+        this.supplys.push(supply);
+
       }
     },
     //初始化子弹
@@ -138,10 +189,29 @@ export default {
         this.bullets.push(new Bullet(this.player));
       }
     },
+    //补给检测
+    checkSupply() {
+      this.balls.forEach(ball => {
+        this.supplys.forEach(supply => {
+          if (ball.checkImpact(supply)) {
+            if (supply.state === 'appear') {
+              ball.pickup(supply);
+            }
+          }
+        })
+      })
+    },
     //拾取检测
     checkPickup() {
       this.enemys.forEach(enemy => {
-        if (this.player.checkImpact(enemy) && enemy.state === 'death') enemy.state = 'dispear';
+        if (this.player.checkImpact(enemy) && enemy.state === 'death') {
+          enemy.pack.forEach(supply => {
+
+            this.player.pickup(supply);
+          });
+          enemy.state = 'dispear';
+
+        }
       });
     },
     //射击检测
@@ -150,10 +220,15 @@ export default {
         this.enemys.forEach(enemy => {
           if (bullet.checkImpact(enemy) && enemy.state === 'alive') {
 
-            this.player.kill++;
-
-            enemy.state = 'death';
-
+            if (enemy.armorValue > 0) {
+              enemy.armorValue -= bullet.owner.attackpower;
+            } else {
+              enemy.hp -= bullet.owner.attackpower;
+            }
+            if (enemy.hp <= 0) {
+              enemy.state = 'death';
+              this.player.kill++;
+            }
           }
         });
       });
@@ -250,6 +325,7 @@ export default {
         this.placeEnemy();
         this.checkImpact();
         this.checkPickup();
+        this.checkSupply();
       }, 20)
     }
   },
@@ -257,7 +333,7 @@ export default {
     //do something after mounting vue instance
     const map = document.querySelector('.game-map');
     this.initPlayer();
-    // console.log(this.player);
+    this.initSupply();
     this.initPoint();
     this.initMap();
     //给document监听键盘事件,并设置对应的处理程序
@@ -268,13 +344,18 @@ export default {
     this.$nextTick(() => {
       const enemies = document.querySelectorAll('.enemy');
       const bullets = document.querySelectorAll('.bullet');
+      const supplys = document.querySelectorAll('.supply');
       this.enemys.forEach((enemy, index) => {
         enemy.element = enemies[index];
       });
       this.bullets.forEach((bullet, index) => {
         bullet.element = bullets[index];
         this.player.bullets.push(bullet);
-      })
+      });
+      this.supplys.forEach((supply, index) => {
+        supply.element = supplys[index];
+        supply.place();
+      });
       this.mainLoop();
     });
   }
@@ -350,6 +431,22 @@ body {
   position: absolute;
 }
 
+.healthbar {
+  position: absolute;
+  left: -6px;
+  top: -15px;
+}
+
+.supply {
+  width: 48px;
+  height: 48px;
+  position: absolute;
+}
+
+.supply img {
+  width: 48px;
+}
+
 .bullet {
   width: 16px;
   height: 16px;
@@ -370,10 +467,7 @@ body {
   left: 276px;
 }
 
-.ball_body {
-  width: 48px;
-  position: relative;
-}
+
 
 .ball_pipe {
   height: 16px;
