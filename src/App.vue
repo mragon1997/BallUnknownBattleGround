@@ -1,7 +1,10 @@
 <template>
 <div class="game">
   <div class="game-content">
+    <!--游戏通知-->
+    <div class="notice">
 
+    </div>
     <!--游戏主面板-->
     <div class="main-content">
       <!--游戏地图-->
@@ -388,6 +391,16 @@ body {
   background-size: cover;
 }
 
+.notice {
+  width: 25%;
+  height: 600px;
+  float: left;
+  margin-left: -30%;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
+
+}
+
 .game-content {
   width: 850px;
   height: 600px;
@@ -395,7 +408,6 @@ body {
   box-shadow: 2px 3px 3px #444;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.4);
-
 }
 
 .main-content {
