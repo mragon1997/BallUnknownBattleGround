@@ -2,8 +2,16 @@
 <div class="game">
   <div class="game-content">
     <!--游戏通知-->
-    <div class="notice">
-
+    <div class="notice" ref="notice">
+      <p class="notice-item">欢迎来到 《绝地球生》！</p>
+      <p class="notice-item">初始化玩家...</p>
+      <p class="notice-item">初始化游戏地图...</p>
+      <p class="notice-item">初始化补给物品...</p>
+      <p class="notice-item">游戏初始化完毕</p>
+      <p class="notice-item">开始游戏！</p>
+      <p class="notice-item" v-for="notice in notices"><span class="notice-object">{{notice.subject}}</span> {{notice.verb}}了 <span class="notice-object">{{notice.predicate}}</span></p>
+      <div style="height:30px;">
+      </div>
     </div>
     <!--游戏主面板-->
     <div class="main-content">
@@ -34,8 +42,6 @@
             <img src="./assets/hulk.png" v-if="supply.name==='hulk'">
             <img src="./assets/iron.png" v-if="supply.name==='iron'">
             <img src="./assets/cap.png" v-if="supply.name==='cap'">
-
-
           </div>
           <!--子弹-->
           <div class="bullet" v-for="bullet in bullets">
@@ -101,11 +107,13 @@
 <script>
 import $ from './util/util.js';
 import Config from './util/config.js';
+import List from './util/supplylist.js';
 import Player from './class/player.js';
 import Point from './class/point.js';
 import Enemy from './class/enemy.js';
 import Bullet from './class/bullet.js';
 import Supply from './class/supply.js';
+import Notice from './class/notice.js';
 import HealthBar from './components/health.vue';
 
 
@@ -132,6 +140,7 @@ export default {
       enemys: [], //保存所有敌人的数组
       bullets: [], //保存所有子弹的数组
       supplys: [], //保存地图中所有补给物品的数组
+      notices: [], //保存游戏中所有消息的数组
       enemyNum: Config.enemyNum, //生成敌人的数量
       SupplyNum: Config.supplyNum, //生成补给物品的数量
       isleft: false,
@@ -183,7 +192,6 @@ export default {
         supply.x = $.getRandomPosition();
         supply.y = $.getRandomPosition();
         this.supplys.push(supply);
-
       }
     },
     //初始化子弹
@@ -199,6 +207,8 @@ export default {
           if (ball.checkImpact(supply)) {
             if (supply.state === 'appear') {
               ball.pickup(supply);
+              this.notices.push(new Notice(ball.name, '拾取', List.titles[supply.name]));
+              this.scrollBottom();
             }
           }
         })
@@ -209,11 +219,11 @@ export default {
       this.enemys.forEach(enemy => {
         if (this.player.checkImpact(enemy) && enemy.state === 'death') {
           enemy.pack.forEach(supply => {
-
             this.player.pickup(supply);
+            this.notices.push(new Notice(this.player.name, '拾取', List.titles[supply.name]));
+            this.scrollBottom();
           });
           enemy.state = 'dispear';
-
         }
       });
     },
@@ -229,8 +239,12 @@ export default {
               enemy.hp -= bullet.owner.attackpower;
             }
             if (enemy.hp <= 0) {
+
               enemy.state = 'death';
-              this.player.kill++;
+              bullet.owner.kill++;
+              this.notices.push(new Notice(bullet.owner.name, '击杀', enemy.name));
+              this.scrollBottom();
+
             }
           }
         });
@@ -315,7 +329,9 @@ export default {
 
       }, 20);
     },
-
+    scrollBottom() {
+      this.$refs.notice.scrollTop = this.$refs.notice.scrollHeight;
+    },
     mainLoop() {
       const mainTimer = setInterval(() => {
         this.enemys.forEach((enemy) => {
@@ -396,9 +412,63 @@ body {
   height: 600px;
   float: left;
   margin-left: -30%;
+  padding: 20px;
+  box-sizing: border-box;
+  font-size: 12px;
+  font-family: 微软雅黑;
   background: rgba(0, 0, 0, 0.5);
   border-radius: 5px;
+  overflow: scroll;
+}
 
+.notice::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+}
+
+/*滚动条两端的箭头*/
+
+.notice::-webkit-scrollbar-button {
+  display: none;
+}
+
+/*经测试好像并不能控制什么*/
+
+.notice::-webkit-scroll-track {
+  display: none;
+}
+
+/*滚动条内侧部分 去掉*/
+
+.notice::-webkit-scrollbar-track-piece {
+  display: none;
+}
+
+/*滚动条中可以拖动的那部分*/
+
+.notice::-webkit-scrollbar-thumb {
+  background-color: #82a6f5;
+  border-radius: 4px;
+}
+
+/*变角部分*/
+
+.notice::-webkit-scrollbar-corner {
+  display: none;
+}
+
+.notice::-webkit-resizer {
+  display: none;
+}
+
+.notice-item {
+  color: yellow;
+}
+
+.notice-object {
+  color: skyblue;
 }
 
 .game-content {
