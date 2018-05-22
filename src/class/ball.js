@@ -9,6 +9,7 @@ import Substance from './substance.js';
 //  state: String类型,表示角色当前的状态，alive表示存活,dead表示死亡,destory表示销毁
 //  hp: Number类型，表示角色当前的生命值,当生命值小于等于0时，角色的状态切换为dead
 //  speed: Number类型,表示角色的移动速度，数值越大，角色移动速度越快
+//  kill:Number类型,用于记录角色的击杀数
 //  range: Number类型,表示角色的射程，数值越大，角色发射的子弹的移动距离越远
 //  attackpower:Number类型,表示角色的攻击力，数值越大，命中敌人造成的伤害量越大
 //  bullets:Array类型,表示角色当前携带的子弹
@@ -24,6 +25,7 @@ class Ball extends Substance {
     this.state = 'alive';
     this.hp = 100;
     this.speed = Config.defaultSpeed;
+    this.kill = 0;
     this.range = Config.defalutRange;
     this.attackpower = Config.defaultAttackPower;
     this.bullets = [];

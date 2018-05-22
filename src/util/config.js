@@ -1,9 +1,10 @@
 //游戏初始化配置
 const Config = {
   playerSpeed: 5,
-  enemyNum: 50, //生成敌人数量
+  enemyNum: 49, //生成敌人数量
   supplyNum: 100, //生成补给物品的数量
 
+  enemyShotRate: 0.03, //敌人自动攻击的概率
   defaultSpeed: 2, //敌人的默认移动速度
   defalutRange: 200, // 角色的默认射程
   defaultAttackPower: 5, //角色默认的攻击力

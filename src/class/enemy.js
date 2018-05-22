@@ -31,14 +31,11 @@ class Enemy extends Ball {
       //根据敌人改变方向的概率判断是否应该改变方向
       if (Math.random() < this.turnDirec) this.x_direc = !this.x_direc;
       if (Math.random() < this.turnDirec) this.y_direc = !this.y_direc;
-
-
       //到达地图边界时强制改变敌人运动方向
       if (this.x <= 24) this.x_direc = true;
       if (this.x >= 3662) this.x_direc = false;
       if (this.y <= 24) this.y_direc = true;
       if (this.y >= 3662) this.y_direc = false;
-
       //根据方向来确定敌人相应坐标的加减
       if (this.x_direc) {
         this.x += this.speed;
@@ -50,6 +47,22 @@ class Enemy extends Ball {
       } else {
         this.y -= this.speed;
       }
+    }
+  }
+  //敌人自动攻击
+  autoAttack(balls, bullets) {
+    //当敌人有子弹时，可以进行自动攻击
+    if (this.bullets.length > 0 && Math.random() < Config.enemyShotRate && this.state === 'alive') {
+      const shotrange = new Substance();
+      shotrange.x = this.x;
+      shotrange.y = this.y;
+      shotrange.r = this.range;
+      balls.forEach(ball => {
+        if (shotrange.checkImpact(ball) && ball.state === 'alive' && ball != this) {
+          this.shot(ball.x, ball.y, bullets);
+        }
+      })
+
     }
   }
 }

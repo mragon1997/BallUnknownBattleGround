@@ -1,5 +1,9 @@
 <template>
 <div class="game">
+  <div class="game-result" v-show="isend">
+    <h1 v-show="iswin">大吉大利，今晚吃鸡</h1>
+    <h1 v-show="!iswin">再接再厉，下次刺激</h1>
+  </div>
   <div class="game-content">
     <!--游戏通知-->
     <div class="notice" ref="notice">
@@ -64,8 +68,8 @@
     <!--游戏侧边栏-->
     <div class="sidebar">
       <!--通知栏-->
-      <div class="game-notice">
-
+      <div class="game-statistics">
+        存活：{{survivor}}
       </div>
       <!--玩家信息-->
       <div class="player-info">
@@ -145,7 +149,21 @@ export default {
       isleft: false,
       isright: false,
       istop: false,
-      isbottom: false
+      isbottom: false,
+      isend: false,
+      iswin: false,
+      timer: null
+    }
+  },
+  computed: {
+    survivor() {
+      let survivors = 0;
+      this.balls.forEach(ball => {
+        if (ball.state === 'alive') {
+          survivors++;
+        }
+      })
+      return survivors;
     }
   },
   methods: {
@@ -235,17 +253,27 @@ export default {
     checkImpact() {
       this.flyingbullets.forEach(bullet => {
         bullet.isflying = true;
-        this.enemys.forEach(enemy => {
-          if (bullet.checkImpact(enemy) && enemy.state === 'alive') {
-            if (enemy.armorValue > 0) {
-              enemy.armorValue -= bullet.owner.attackpower;
+        this.balls.forEach(ball => {
+          if (bullet.checkImpact(ball) && ball.state === 'alive' && ball != bullet.owner) {
+            if (ball.armorValue > 0) {
+              ball.armorValue -= bullet.owner.attackpower;
             } else {
-              enemy.hp -= bullet.owner.attackpower;
+              ball.hp -= bullet.owner.attackpower;
             }
-            if (enemy.hp <= 0) {
-              enemy.state = 'death';
+            if (ball.hp <= 0) {
               bullet.owner.kill++;
-              this.notices.push(new Notice(bullet.owner.name, '击杀', enemy.name));
+              if (this.player === ball) {
+                ball.state = 'death';
+                this.isend = true;
+                clearInterval(this.timer);
+              } else {
+                ball.state = 'death';
+                if (this.survivor === 1) {
+                  this.isend = true;
+                  this.iswin = true;
+                }
+              }
+              this.notices.push(new Notice(bullet.owner.name, '击杀', ball.name));
               this.scrollBottom();
             }
           }
@@ -260,6 +288,7 @@ export default {
     placeEnemy() {
       this.enemys.forEach(enemy => {
         enemy.place();
+        enemy.autoAttack(this.balls, this.flyingbullets);
       });
     },
     handleKeydown(e) {
@@ -334,7 +363,9 @@ export default {
       this.$refs.notice.scrollTop = this.$refs.notice.scrollHeight;
     },
     mainLoop() {
-      const mainTimer = setInterval(() => {
+
+
+      this.timer = setInterval(() => {
         this.enemys.forEach((enemy) => {
           enemy.autoMove();
         });
@@ -405,6 +436,19 @@ body {
   bottom: 0;
   background: url(./assets/8.jpg);
   background-size: cover;
+}
+
+.game-result {
+  position: fixed;
+  z-index: 8888;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  color: yellow;
+  text-align: center;
+  line-height: 500px;
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .notice {
@@ -568,7 +612,10 @@ body {
   border-radius: 10px 10px 0 0;
 }
 
-.game-notice {
+.game-statistics {
+  padding: 30px;
+  box-sizing: border-box;
+  color: red;
   width: 250px;
   height: 100px;
 }
