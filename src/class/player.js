@@ -23,7 +23,7 @@ class Player extends Ball {
     pipe.style.transform = 'rotate(' + this.shot_angle + 'deg)';
   }
   //玩家发起攻击
-  attack() {
+  attack(bullets) {
     //将射击角度转换为弧度制
     const rad = Math.PI / 180 * this.shot_angle;
     //计算目标的位置的x坐标
@@ -31,7 +31,8 @@ class Player extends Ball {
     //计算目标的位置的y坐标
     const target_y = this.y + Math.floor(this.range * Math.sin(rad));
     //像目标位置发射子弹
-    this.shot(target_x, target_y);
+    this.shot(target_x, target_y, bullets);
+
   }
 
 }

@@ -31,6 +31,7 @@
           </div>
           <!--补给物品-->
           <div class="supply" v-for="supply in supplys" v-show="supply.state ==='appear'">
+            <img src="./assets/bullets.png" v-if="supply.name==='bullet'">
             <img src="./assets/pistol.png" v-if="supply.name==='psitol'">
             <img src="./assets/ak47.png" v-if="supply.name==='ak47'">
             <img src="./assets/beer.png" v-if="supply.name==='beer'">
@@ -44,7 +45,7 @@
             <img src="./assets/cap.png" v-if="supply.name==='cap'">
           </div>
           <!--子弹-->
-          <div class="bullet" v-for="bullet in bullets">
+          <div class="bullet" v-for="bullet in bullets.dataStore" v-show="bullet.isflying">
             <img src="./assets/bullet.png">
           </div>
         </div>
@@ -68,7 +69,6 @@
       </div>
       <!--玩家信息-->
       <div class="player-info">
-
         <p>
           <i><img src="./assets/icon/player.png" alt=""></i> 玩家:{{player.name}}
         </p>
@@ -105,23 +105,21 @@
 </template>
 
 <script>
+//工具类
 import $ from './util/util.js';
 import Config from './util/config.js';
 import List from './util/supplylist.js';
+//类
 import Player from './class/player.js';
 import Point from './class/point.js';
 import Enemy from './class/enemy.js';
 import Bullet from './class/bullet.js';
 import Supply from './class/supply.js';
 import Notice from './class/notice.js';
+//组件
 import HealthBar from './components/health.vue';
-
-
-
-
-
-
-
+//数据结构
+import bulletlist from './datastructure/list.js';
 
 
 export default {
@@ -138,7 +136,8 @@ export default {
       map: null, //游戏地图
       balls: [], //保存游戏中的所有角色
       enemys: [], //保存所有敌人的数组
-      bullets: [], //保存所有子弹的数组
+      bullets: bulletlist, //保存所有子弹的列表
+      flyingbullets: [], //用于保存所有处于飞行状态的子弹
       supplys: [], //保存地图中所有补给物品的数组
       notices: [], //保存游戏中所有消息的数组
       enemyNum: Config.enemyNum, //生成敌人的数量
@@ -147,7 +146,6 @@ export default {
       isright: false,
       istop: false,
       isbottom: false
-
     }
   },
   methods: {
@@ -172,7 +170,6 @@ export default {
       const point = new Point();
       point.element = document.querySelector('.point');
       point.computePosition(this.player);
-
       this.point = point;
     },
     //初始化敌人
@@ -186,19 +183,26 @@ export default {
     //初始化补给物品
     initSupply() {
       for (let i = 0; i < this.SupplyNum; i++) {
-        const supply = new Supply();
-        supply.name = $.getRandomSupply();
-        supply.r = 24;
-        supply.x = $.getRandomPosition();
-        supply.y = $.getRandomPosition();
-        this.supplys.push(supply);
+        this.generateSupply($.getRandomSupply());
+      }
+      for (let i = 0; i < 30; i++) {
+        this.generateSupply('bullet');
       }
     },
     //初始化子弹
     initBullet() {
       for (let i = 0; i < 300; i++) {
-        this.bullets.push(new Bullet(this.player));
+        this.bullets.append(new Bullet());
       }
+    },
+    //生成补给
+    generateSupply(name) {
+      const supply = new Supply();
+      supply.name = name;
+      supply.r = 24;
+      supply.x = $.getRandomPosition();
+      supply.y = $.getRandomPosition();
+      this.supplys.push(supply);
     },
     //补给检测
     checkSupply() {
@@ -206,7 +210,7 @@ export default {
         this.supplys.forEach(supply => {
           if (ball.checkImpact(supply)) {
             if (supply.state === 'appear') {
-              ball.pickup(supply);
+              ball.pickup(supply, this.bullets);
               this.notices.push(new Notice(ball.name, '拾取', List.titles[supply.name]));
               this.scrollBottom();
             }
@@ -219,7 +223,7 @@ export default {
       this.enemys.forEach(enemy => {
         if (this.player.checkImpact(enemy) && enemy.state === 'death') {
           enemy.pack.forEach(supply => {
-            this.player.pickup(supply);
+            this.player.pickup(supply, this.bullets);
             this.notices.push(new Notice(this.player.name, '拾取', List.titles[supply.name]));
             this.scrollBottom();
           });
@@ -229,29 +233,27 @@ export default {
     },
     //射击检测
     checkImpact() {
-      this.bullets.forEach(bullet => {
+      this.flyingbullets.forEach(bullet => {
+        bullet.isflying = true;
         this.enemys.forEach(enemy => {
           if (bullet.checkImpact(enemy) && enemy.state === 'alive') {
-
             if (enemy.armorValue > 0) {
               enemy.armorValue -= bullet.owner.attackpower;
             } else {
               enemy.hp -= bullet.owner.attackpower;
             }
             if (enemy.hp <= 0) {
-
               enemy.state = 'death';
               bullet.owner.kill++;
               this.notices.push(new Notice(bullet.owner.name, '击杀', enemy.name));
               this.scrollBottom();
-
             }
           }
         });
       });
     },
     placeBullet() {
-      this.bullets.forEach(bullet => {
+      this.flyingbullets.forEach(bullet => {
         bullet.place();
       })
     },
@@ -281,7 +283,7 @@ export default {
           this.player.rotatePipe(-1);
           break;
         case 74:
-          this.player.attack();
+          this.player.attack(this.flyingbullets);
           break;
         default:
       }
@@ -326,7 +328,6 @@ export default {
         }
         //根据游戏玩家的移动,改变地图标点的位置
         this.point.computePosition(this.player);
-
       }, 20);
     },
     scrollBottom() {
@@ -337,7 +338,7 @@ export default {
         this.enemys.forEach((enemy) => {
           enemy.autoMove();
         });
-        this.bullets.forEach((bullet) => {
+        this.flyingbullets.forEach((bullet) => {
           bullet.move();
         });
         this.placeBullet();
@@ -352,7 +353,6 @@ export default {
     //do something after mounting vue instance
     const map = document.querySelector('.game-map');
     this.initPlayer();
-    this.initSupply();
     this.initPoint();
     this.initMap();
     //给document监听键盘事件,并设置对应的处理程序
@@ -360,6 +360,7 @@ export default {
     document.addEventListener('keyup', this.handleKeyup);
     this.initEnemy();
     this.initBullet();
+    this.initSupply();
     this.$nextTick(() => {
       const enemies = document.querySelectorAll('.enemy');
       const bullets = document.querySelectorAll('.bullet');
@@ -369,7 +370,6 @@ export default {
       });
       this.bullets.forEach((bullet, index) => {
         bullet.element = bullets[index];
-        this.player.bullets.push(bullet);
       });
       this.supplys.forEach((supply, index) => {
         supply.element = supplys[index];

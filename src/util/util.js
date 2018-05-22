@@ -12,12 +12,17 @@ const Util = {
   getRandomSupply() {
     let list = [];
     let quantity = 0;
+    let supplyname = '';
     for (name in List.species) {
       list.push(name);
       quantity++;
     }
-    return list[Math.floor(Math.random() * quantity)];
-
+    supplyname = list[Math.floor(Math.random() * quantity)];
+    if (List.rate[supplyname] > Math.random()) {
+      return supplyname;
+    } else {
+      return this.getRandomSupply();
+    }
   }
 }
 

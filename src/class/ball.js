@@ -32,20 +32,22 @@ class Ball extends Substance {
     this.armorValue = '0';
   }
   //发射子弹方法
-  shot(target_x, target_y) {
-    const bullet = this.bullets.pop();
-    bullet.x = this.x;
-    bullet.y = this.y;
-    bullet.r = 8;
-    bullet.start_x = this.x;
-    bullet.start_y = this.y;
-    bullet.target_x = target_x;
-    bullet.target_y = target_y;
+  shot(target_x, target_y, bullets) {
+    if (this.bullets.length > 0) {
+      const bullet = this.bullets.pop();
+      bullet.x = this.x;
+      bullet.y = this.y;
+      bullet.r = 8;
+      bullet.start_x = this.x;
+      bullet.start_y = this.y;
+      bullet.target_x = target_x;
+      bullet.target_y = target_y;
+      bullets.push(bullet);
+    }
   }
 
   //拾取补给
-  pickup(supply) {
-
+  pickup(supply, bullets) {
     const specie = List.species[supply.name];
     const num = List.num[supply.name];
     if (specie === 'weapon') {
@@ -61,6 +63,13 @@ class Ball extends Substance {
       this.pack.push(supply);
       this.armor = supply.name;
       this.armorValue = num;
+    } else if (specie === 'bullet') {
+      for (let i = 0; i < num; i++) {
+        const bullet = bullets.getElement();
+        bullets.next();
+        bullet.owner = this;
+        this.bullets.push(bullet);
+      }
     }
     supply.state = 'dispear';
   }

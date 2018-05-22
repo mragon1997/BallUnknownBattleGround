@@ -1,5 +1,6 @@
 const list = {
   species: {
+    bullet: 'bullet',
     beer: 'weapon',
     pistol: 'weapon',
     ak47: 'weapon',
@@ -14,6 +15,7 @@ const list = {
     cap: 'armor'
   },
   num: {
+    bullet: 10,
     beer: 1,
     pistol: 10,
     ak47: 20,
@@ -28,6 +30,7 @@ const list = {
     cap: 20
   },
   titles: {
+    bullet: '子弹',
     beer: '啤酒瓶子',
     pistol: '手枪',
     ak47: 'AK47',
@@ -40,7 +43,22 @@ const list = {
     thor: '托尔战甲',
     war: '战争机器战甲',
     cap: '美队战甲'
+  },
+  rate: {
+    beer: 0.01,
+    pistol: 0.4,
+    ak47: 0.2,
+    cigarettes: 1,
+    cola: 0.3,
+    pill: 0.2,
+    aid: 0.1,
+    hulk: 0.01,
+    iron: 0.01,
+    thor: 0.01,
+    war: 0.01,
+    cap: 0.01
   }
+
 }
 
 export default list;
