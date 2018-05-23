@@ -1,8 +1,22 @@
 <template>
 <div class="game">
+  <div class="game-firstscreen" v-show="!isGameStart">
+    <h1>绝地球生</h1>
+    <h2>BALLBATTLE</h2>
+    <div class="game-button" v-show="isGameInit" @click="gameStart">
+      开始游戏
+    </div>
+    <div class="loading" v-show="!isGameInit">
+      <img src="./assets/loading.svg" alt="">
+      <p>游戏正在初始化.....</p>
+    </div>
+  </div>
   <div class="game-result" v-show="isend">
     <h1 v-show="iswin">大吉大利，今晚吃鸡</h1>
     <h1 v-show="!iswin">再接再厉，下次刺激</h1>
+    <div class="game-button" @click="gameReload">
+      重新开始
+    </div>
   </div>
   <div class="game-content">
     <!--游戏通知-->
@@ -41,7 +55,7 @@
             <img src="./assets/beer.png" v-if="supply.name==='beer'">
             <img src="./assets/pill.png" v-if="supply.name==='pill'">
             <img src="./assets/cola.png" v-if="supply.name==='cola'">
-            <img src="./assets/cigarettes.png" v-if="supply.name==='cigarettes'">
+            <img src="./assets/aid.png" v-if="supply.name==='aid'">
             <img src="./assets/thor.png" v-if="supply.name==='thor'">
             <img src="./assets/war.png" v-if="supply.name==='war'">
             <img src="./assets/hulk.png" v-if="supply.name==='hulk'">
@@ -56,13 +70,14 @@
       </div>
       <!--player-->
       <div class="ball-body">
-        <img src="./assets/pipe.png" class="ball_pipe">
-        <img src="./assets/ball.png" v-if="this.player.armor==='normal'" class="ball_body">
-        <img src="./assets/thor.png" v-if="this.player.armor==='thor'">
-        <img src="./assets/war.png" v-if="this.player.armor==='war'">
-        <img src="./assets/hulk.png" v-if="this.player.armor==='hulk'">
-        <img src="./assets/iron.png" v-if="this.player.armor==='iron'">
-        <img src="./assets/cap.png" v-if="this.player.armor==='cap'">
+        <img src="./assets/pipe.png" class="ball_pipe" v-show="this.player.state==='alive'">
+        <img src="./assets/box.png" v-show="this.player.hp<=0&&this.player.state==='death'">
+        <img src="./assets/ball.png" v-show="this.player.armorValue<=0&&this.player.state==='alive'" class="ball_body">
+        <img src="./assets/thor.png" v-show="this.player.armor==='thor'&&this.player.armorValue>0">
+        <img src="./assets/war.png" v-show="this.player.armor==='war'&&this.player.armorValue>0">
+        <img src="./assets/hulk.png" v-show="this.player.armor==='hulk'&&this.player.armorValue>0">
+        <img src="./assets/iron.png" v-show="this.player.armor==='iron'&&this.player.armorValue>0">
+        <img src="./assets/cap.png" v-show="this.player.armor==='cap'&&this.player.armorValue>0">
       </div>
     </div>
     <!--游戏侧边栏-->
@@ -152,6 +167,8 @@ export default {
       isbottom: false,
       isend: false,
       iswin: false,
+      isGameStart: false,
+      isGameInit: false,
       timer: null
     }
   },
@@ -213,6 +230,18 @@ export default {
         this.bullets.append(new Bullet());
       }
     },
+    gameStart() {
+      this.isGameStart = true;
+      this.mainLoop();
+    },
+    gameEnd() {
+      clearInterval(this.timer);
+      document.removeEventListener('keydown', this.handleKeydown);
+      document.removeEventListener('keyup', this.handleKeyup);
+    },
+    gameReload() {
+      location.reload()
+    },
     //生成补给
     generateSupply(name) {
       const supply = new Supply();
@@ -265,12 +294,13 @@ export default {
               if (this.player === ball) {
                 ball.state = 'death';
                 this.isend = true;
-                clearInterval(this.timer);
+                this.gameEnd();
               } else {
                 ball.state = 'death';
                 if (this.survivor === 1) {
                   this.isend = true;
                   this.iswin = true;
+                  this.gameEnd();
                 }
               }
               this.notices.push(new Notice(bullet.owner.name, '击杀', ball.name));
@@ -363,8 +393,6 @@ export default {
       this.$refs.notice.scrollTop = this.$refs.notice.scrollHeight;
     },
     mainLoop() {
-
-
       this.timer = setInterval(() => {
         this.enemys.forEach((enemy) => {
           enemy.autoMove();
@@ -406,7 +434,7 @@ export default {
         supply.element = supplys[index];
         supply.place();
       });
-      this.mainLoop();
+      this.isGameInit = true;
     });
   }
 }
@@ -438,6 +466,61 @@ body {
   background-size: cover;
 }
 
+.game-firstscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url(./assets/main_bg.png);
+  background-size: cover;
+  z-index: 9999;
+  color: yellow;
+  text-align: center;
+}
+
+.game-firstscreen h1:before {
+  display: block;
+  content: url(./assets/logo.png);
+}
+
+.game-firstscreen h1 {
+  margin-top: 150px;
+  font-size: 50px;
+  margin-bottom: 0;
+
+}
+
+.game-firstscreen h2 {
+  font-size: 30px;
+  margin: 0;
+}
+
+.game-button {
+  width: 200px;
+  height: 100px;
+  margin: 50px auto;
+  line-height: 100px;
+  border: 5px solid white;
+  border-radius: 20px;
+  font-size: 30px;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.game-button:hover {
+  background: rgba(0, 0, 0, 0.3);
+  transition: all 0.5s ease;
+  box-shadow: 2px 3px 3px #111;
+}
+
+.loading {
+  margin-top: 100px;
+}
+
+.loading img {
+  width: 80px;
+}
+
 .game-result {
   position: fixed;
   z-index: 8888;
@@ -447,9 +530,10 @@ body {
   bottom: 0;
   color: yellow;
   text-align: center;
-  line-height: 500px;
+  line-height: 300px;
   background: rgba(0, 0, 0, 0.7);
 }
+
 
 .notice {
   width: 25%;
@@ -649,4 +733,6 @@ body {
   background: url(./assets/point.png);
   position: absolute;
 }
+
+/**/
 </style>
