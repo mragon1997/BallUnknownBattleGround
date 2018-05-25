@@ -28,10 +28,17 @@
           <source src="./assets/audio/iron.mp3">
    </audio>
   <audio id="end">
-         <source src="./assets/radio/end.mp3">
+         <source src="./assets/audio/end.mp3">
    </audio>
 
   <div class="game-firstscreen" v-show="!isGameStart">
+    <div class="game-tip">
+      <p>游戏提示：</p>
+      <p>W.A.S.D控制移动方向</p>
+      <p>Q.E.改变射击方向</p>
+      <p>J发起攻击</p>
+      <p>tip:捡到子弹才能攻击敌人！</p>
+    </div>
     <h1>绝地球生</h1>
     <h2>BALLBATTLE</h2>
     <div class="game-button" v-show="isGameInit" @click="gameStart">
@@ -147,6 +154,27 @@
         <div class="point "></div>
       </div>
     </div>
+    <div class="ranklist">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Name</th>
+            <th>Kill</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr v-for="(ball,index) in sortedBalls">
+            <td>{{index+1}}</td>
+            <td>{{ball.name}}</td>
+            <td>{{ball.kill}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+
+    </div>
 
   </div>
 
@@ -213,8 +241,16 @@ export default {
         }
       })
       return survivors;
+    },
+    sortedBalls() {
+      const sortedballs = [...this.balls];
+      sortedballs.sort((a, b) => {
+        return a.kill < b.kill ? 1 : -1;
+      });
+      return sortedballs;
     }
   },
+
   methods: {
     initPlayer() {
       const p1 = new Player();
@@ -535,6 +571,19 @@ body {
   margin: 0;
 }
 
+.game-tip {
+  position: absolute;
+  left: 50px;
+  top: 50px;
+  color: white;
+  font-size: 20px;
+  background: black;
+  padding: 20px;
+  line-height: 40px;
+  text-align: left;
+  border: 2px solid white;
+}
+
 .game-button {
   width: 200px;
   height: 100px;
@@ -586,6 +635,21 @@ body {
   background: rgba(0, 0, 0, 0.5);
   border-radius: 5px;
   overflow: scroll;
+}
+
+.ranklist {
+  background: rgba(0, 0, 0, 0.5);
+  width: 15%;
+  height: 600px;
+  position: absolute;
+  right: 2%;
+  color: yellow;
+  box-sizing: border-box;
+  text-align: center;
+  border-radius: 5px;
+  padding: 20px;
+  overflow: hidden;
+
 }
 
 .notice::-webkit-scrollbar {
