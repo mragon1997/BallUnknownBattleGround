@@ -1,5 +1,36 @@
 <template>
 <div class="game">
+  <audio id="gun">
+   <source src="./assets/audio/gun.mp3">
+   </audio>
+  <audio id="begin" autoplay loop>
+       <source src="./assets/audio/begin.mp3">
+   </audio>
+  <audio id="pick">
+       <source src="./assets/audio/pick.mp3">
+   </audio>
+  <audio id="pickgun">
+        <source src="./assets/audio/pickgun.mp3">
+   </audio>
+  <audio id="pickbullet">
+        <source src="./assets/audio/pickbullet.mp3">
+   </audio>
+  <audio id="drink">
+         <source src="./assets/audio/drink.mp3">
+   </audio>
+  <audio id="armor">
+          <source src="./assets/audio/armor.mp3">
+   </audio>
+  <audio id="gamestart">
+         <source src="./assets/audio/gamestart.mp3">
+  </audio>
+  <audio id="iron">
+          <source src="./assets/audio/iron.mp3">
+   </audio>
+  <audio id="end">
+         <source src="./assets/radio/end.mp3">
+   </audio>
+
   <div class="game-firstscreen" v-show="!isGameStart">
     <h1>绝地球生</h1>
     <h2>BALLBATTLE</h2>
@@ -128,6 +159,7 @@
 import $ from './util/util.js';
 import Config from './util/config.js';
 import List from './util/supplylist.js';
+import Audio from './util/audio.js';
 //类
 import Player from './class/player.js';
 import Point from './class/point.js';
@@ -220,21 +252,24 @@ export default {
       for (let i = 0; i < this.SupplyNum; i++) {
         this.generateSupply($.getRandomSupply());
       }
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 40; i++) {
         this.generateSupply('bullet');
       }
     },
     //初始化子弹
     initBullet() {
-      for (let i = 0; i < 300; i++) {
+      for (let i = 0; i < 1200; i++) {
         this.bullets.append(new Bullet());
       }
     },
     gameStart() {
       this.isGameStart = true;
       this.mainLoop();
+      Audio.begin.pause();
+      Audio.gamestart.play();
     },
     gameEnd() {
+      Audio.end.play();
       clearInterval(this.timer);
       document.removeEventListener('keydown', this.handleKeydown);
       document.removeEventListener('keyup', this.handleKeyup);
@@ -269,6 +304,7 @@ export default {
     checkPickup() {
       this.enemys.forEach(enemy => {
         if (this.player.checkImpact(enemy) && enemy.state === 'death') {
+          Audio.pick.play();
           enemy.pack.forEach(supply => {
             this.player.pickup(supply, this.bullets);
             this.notices.push(new Notice(this.player.name, '拾取', List.titles[supply.name]));
@@ -342,6 +378,7 @@ export default {
           this.player.rotatePipe(-1);
           break;
         case 74:
+          Audio.gun.play();
           this.player.attack(this.flyingbullets);
           break;
         default:
@@ -409,6 +446,8 @@ export default {
     }
   },
   mounted() {
+    Audio.audioInit();
+
     //do something after mounting vue instance
     const map = document.querySelector('.game-map');
     this.initPlayer();

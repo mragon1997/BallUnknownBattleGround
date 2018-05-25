@@ -1,5 +1,7 @@
 import Config from '../util/config.js';
+import Audio from '../util/audio.js';
 import List from '../util/supplylist.js';
+import Player from './player.js';
 import Substance from './substance.js';
 
 // Ball类表示的游戏中的基本角色
@@ -55,22 +57,40 @@ class Ball extends Substance {
     if (specie === 'weapon') {
       this.pack.push(supply);
       this.attackpower = num;
+      if (this instanceof Player) {
+
+        Audio.pickgun.play();
+      }
     } else if (specie === 'drug') {
       if (this.hp + num >= 100) {
         this.hp = 100;
       } else {
         this.hp += num;
       }
+      if (this instanceof Player) {
+        Audio.drink.play();
+      }
     } else if (specie === 'armor') {
       this.pack.push(supply);
       this.armor = supply.name;
       this.armorValue = num;
+      if (this instanceof Player) {
+        if (supply.name === 'iron') {
+          Audio.iron.play();
+        } else {
+          Audio.armor.play();
+        }
+
+      }
     } else if (specie === 'bullet') {
       for (let i = 0; i < num; i++) {
         const bullet = bullets.getElement();
         bullets.next();
         bullet.owner = this;
         this.bullets.push(bullet);
+      }
+      if (this instanceof Player) {
+        Audio.pickbullet.play();
       }
     }
     supply.state = 'dispear';

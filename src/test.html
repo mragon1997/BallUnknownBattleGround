@@ -6,135 +6,180 @@
   <title></title>
 </head>
 <style media="screen">
-  .map {
-    width: 100px;
-    height: 100px;
-    background: red;
+  body {
+    background-color: #FFBF2F;
+    background-image: linear-gradient(-180deg, #FFBF2F 0%, #FF9F00 100%);
+    margin: 0;
+    font-family: 'Press Start 2P', cursive;
+  }
+
+  body * {
+    user-select: none;
+  }
+
+  .screen {
+    width: 564px;
+    height: 578px;
+    background-color: #470A6C;
+    margin: 32px auto 127px auto;
+    padding: 20px 0;
+    box-sizing: border-box;
+    position: relative;
+    transform: translateX(-46px);
+  }
+
+  .container {
+    margin: 0 20px;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .visuals {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .analysers {
+    width: 182px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .analysers span {
+    color: #01A800;
+    font-size: 12px;
+    position: absolute;
+    margin: 4px 2px;
+  }
+
+  canvas {
+    background-image: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/355309/8bit-visualize-bg.svg);
+  }
+
+  .screen:after {
+    width: 157px;
+    height: 578px;
+    background-color: #C93CBD;
+    content: "";
+    display: block;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    transform: skewY(39deg);
+    transform-origin: top left;
+  }
+
+  .screen:before {
+    width: 564px;
+    height: 127px;
+    background-color: #A42C9A;
+    content: "";
+    display: block;
+    position: absolute;
+    transform-origin: top left;
+    transform: skewX(51deg);
+    top: 100%;
+  }
+
+  .playlist {
+    background-color: #009AA8;
+  }
+
+  .playlist a {
+    display: block;
+    font-size: 12px;
+    color: #F2F2F2;
+    line-height: 36px;
+    padding: 0 16px;
+    cursor: pointer;
+  }
+
+  .playlist a:hover,
+  .playlist a.active {
+    background-color: #F2F2F2;
+    color: #01A800;
+  }
+
+  .play-wrapper {
+    text-align: center;
+  }
+
+  .play {
+    width: 142px;
+    height: 42px;
+    background-color: #3A00FC;
+    display: inline-block;
+    margin: 0 auto;
+    font-size: 12px;
+    line-height: 12px;
+    padding: 15px 0;
+    text-align: center;
+    box-sizing: border-box;
+    color: #F9D879;
+    -webkit-clip-path: polygon(0% 15%, 5% 15%, 5% 0%, 95% 0%, 95% 15%, 100% 15%, 100% 85%, 95% 85%, 95% 100%, 5% 100%, 5% 85%, 0% 85%);
+    clip-path: polygon(0% 15%, 5% 15%, 5% 0%, 95% 0%, 95% 15%, 100% 15%, 100% 85%, 95% 85%, 95% 100%, 5% 100%, 5% 85%, 0% 85%);
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+
+  .play:hover {
+    background-color: #0532FD;
+  }
+
+  .tv {
+    height: 282px;
+    display: flex;
+    align-items: center;
+    background-color: #000;
+    padding: 20px;
+    box-sizing: border-box;
+    margin-right: 20px;
+  }
+
+  .tv video {
+    width: 100%;
+    height: 100%;
+  }
+
+  html,
+  body {
+    min-height: 100%;
   }
 </style>
 
 <body>
-  <div class="map"></div>
+  <<div class="screen">
+    <div class="container">
+      <div class="visuals">
+        <div class="tv">
+          <video width="324" height="282" loop>
+          <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/355309/8-bit-zelda.mp4" type="video/mp4">
+        </video>
+        </div>
+        <div class="analysers">
+          <div><span>pulse 1</span><canvas id="pulse" width="182" height="60"></canvas></div>
+          <div><span>pulse 2</span><canvas id="square" width="182" height="60"></canvas></div>
+          <div><span>triangle</span><canvas id="triangle" width="182" height="60"></canvas></div>
+          <div><span>noise</span><canvas id="noise" width="182" height="60"></canvas></div>
+        </div>
+      </div>
+      <div class="playlist">
+        <a class="song active" data-index="0">The Legend of Zelda (overworld)</a>
+        <a class="song" data-index="1">Pac-Man (intro)</a>
+        <a class="song" data-index="2">Super Mario Bros (overworld)</a>
+        <a class="song" data-index="3">Metroid (title theme)</a>
+        <a class="song" data-index="4">Kirby's Adventure (Vegetable Valley)</a>
+      </div>
+      <div class="play-wrapper">
+        <a class="play">Play</a>
+      </div>
+    </div>
+    </div>
 
 
-
-  <script src="https://cdn.bootcss.com/vue/2.5.17-beta.0/vue.min.js"></script>
-  <script type="text/javascript">
-    class List {
-      //列表的构造函数
-      constructor() {
-        //列表元素的个数
-        this.listSize = 0;
-        //列表当前的位置
-        this.pos = 0;
-        //返回列表中的所有元素
-        this.dataStore = [];
-      }
-      //向列表中追加元素
-      append(element) {
-        this.dataStore[this.listSize++] = element;
-      }
-      //查找列表中是否存在某个元素，如果存在返回位置
-      find(element) {
-        for (let i = 0; i < this.dataStore.length; ++i) {
-          if (this.dataStore[i] == element) {
-            return i;
-          }
-        }
-        return -1;
-      }
-      //移除列表中的指定元素
-      remove(element) {
-        let foundAt = this.find(element);
-        if (foundAt > -1) {
-          this.dataStore.splice(foundAt, 1);
-          --this.listSize;
-          return true;
-        }
-        return false;
-      }
-      //返回列表中有多少个元素
-      length() {
-        return this.listSize;
-      }
-      //显示列表中的元素
-      toString() {
-        return this.dataStore;
-      }
-      //向列表中插入一个元素
-      insert() {
-        var insertPos = this.find(after);
-        if (insertPos > -1) {
-          this.dataStore.splice(insertPos + 1, 0, element);
-          ++this.listSize;
-          return true;
-        }
-        return false;
-      }
-      //清空列表中的所有元素
-      clear() {
-        delete this.dataStore;
-        this.dataStore.length = 0;
-        this.listSize = this.pos = 0;
-      }
-      //判断给定值是否在列表中
-      contains(element) {
-        for (var i = 0; i < this.dataStore.length; ++i) {
-          if (this.dataStore[i] == element) {
-            return true;
-          }
-        }
-        return false;
-      }
-
-      //遍历列表的方法
-      front() {
-        this.pos = 0;
-      }
-
-      end() {
-        this.pos = this.listSize - 1;
-      }
-
-      prev() {
-        --this.pos;
-      }
-
-      next() {
-        if (this.pos < this.listSize) {
-          ++this.pos;
-        }
-      }
-
-      currPos() {
-        return this.pos;
-      }
-
-      moveTo(position) {
-        this.pos = position;
-      }
-
-      getElement() {
-        return this.dataStore[this.pos];
-      }
-
-      hasNext() {
-        return this.pos < this.listSize;
-      }
-
-      hasPrev() {
-        return this.pos >= 0;
-      }
-      //迭代器
-      forEach(fn) {
-        this.dataStore.forEach(fn);
-      }
-    }
-    const bullets = new List();
-
-
-    export default bullets;
-  </script>
 </body>
 
 </html>

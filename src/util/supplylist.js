@@ -14,7 +14,7 @@ const list = {
     cap: 'armor'
   },
   num: {
-    bullet: 10,
+    bullet: 30,
     beer: 1,
     pistol: 10,
     ak47: 20,
