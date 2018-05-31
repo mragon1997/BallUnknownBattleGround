@@ -58,17 +58,25 @@
   </div>
   <div class="game-content">
     <!--游戏通知-->
-    <div class="notice" ref="notice">
-      <p class="notice-item">欢迎来到 《绝地球生》！</p>
-      <p class="notice-item">初始化玩家...</p>
-      <p class="notice-item">初始化游戏地图...</p>
-      <p class="notice-item">初始化补给物品...</p>
-      <p class="notice-item">游戏初始化完毕</p>
-      <p class="notice-item">开始游戏！</p>
-      <p class="notice-item" v-for="notice in notices"><span class="notice-object">{{notice.subject}}</span> {{notice.verb}}了 <span class="notice-object">{{notice.predicate}}</span></p>
-      <div style="height:30px;">
+    <div class="left-sidebar">
+      <div class="notice" ref="notice">
+        <p class="notice-item">欢迎来到 《绝地球生》！</p>
+        <p class="notice-item">初始化玩家...</p>
+        <p class="notice-item">初始化游戏地图...</p>
+        <p class="notice-item">初始化补给物品...</p>
+        <p class="notice-item">游戏初始化完毕</p>
+        <p class="notice-item">开始游戏！</p>
+        <p class="notice-item" v-for="notice in notices"><span class="notice-object">{{notice.subject}}</span> {{notice.verb}} <span class="notice-object">{{notice.predicate}}</span></p>
+        <div style="height:50px;">
+        </div>
+      </div>
+
+      <div class="dialog">
+        <input type="text" v-model="message" class="dialog-item">
+        <button type="button" name="button" class="dialog-item" @click="handleSendMessage">发送</button>
       </div>
     </div>
+
     <!--游戏主面板-->
     <div class="main-content">
       <!--游戏地图-->
@@ -116,6 +124,8 @@
         <img src="./assets/hulk.png" v-show="this.player.armor==='hulk'&&this.player.armorValue>0">
         <img src="./assets/iron.png" v-show="this.player.armor==='iron'&&this.player.armorValue>0">
         <img src="./assets/cap.png" v-show="this.player.armor==='cap'&&this.player.armorValue>0">
+        <img src="./assets/peppa.png" v-show="this.player.armor==='peppa'&&this.player.armorValue>0">
+        <img src="./assets/auto.png" v-show="this.player.armor==='auto'&&this.player.armorValue>0">
       </div>
     </div>
     <!--游戏侧边栏-->
@@ -221,6 +231,7 @@ export default {
       notices: [], //保存游戏中所有消息的数组
       enemyNum: Config.enemyNum, //生成敌人的数量
       SupplyNum: Config.supplyNum, //生成补给物品的数量
+      message: '',
       isleft: false,
       isright: false,
       istop: false,
@@ -322,6 +333,35 @@ export default {
       supply.y = $.getRandomPosition();
       this.supplys.push(supply);
     },
+    handleSendMessage() {
+      if (this.message !== '') {
+        if (this.message === 'hpmax') {
+          this.player.hp = 100;
+        } else if (this.message === 'superweapon') {
+          this.player.attackpower = 100;
+        } else if (this.message === 'ironman') {
+          this.player.pickup({
+            specie: 'armor',
+            name: 'iron',
+            num: 100
+          });
+        } else if (this.message === 'peppapig') {
+          this.player.pickup({
+            specie: 'armor',
+            name: 'peppa',
+            num: 9999
+          });
+        } else if (this.message === 'ultraman') {
+          this.player.pickup({
+            specie: 'armor',
+            name: 'auto',
+            num: 200
+          });
+        }
+        this.notices.push(new Notice(this.player.name, '说：', this.message));
+        this.message = '';
+      }
+    },
     //补给检测
     checkSupply() {
       this.balls.forEach(ball => {
@@ -395,6 +435,9 @@ export default {
     },
     handleKeydown(e) {
       switch (e.keyCode) {
+        case 13:
+          this.handleSendMessage();
+          break;
         case 87:
           this.istop = true;
           break;
@@ -622,19 +665,66 @@ body {
   background: rgba(0, 0, 0, 0.7);
 }
 
-
-.notice {
+.left-sidebar {
   width: 25%;
-  height: 600px;
+  height: 580px;
   float: left;
   margin-left: -30%;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+  border-radius: 5px;
   padding: 20px;
+  box-sizing: border-box;
+}
+
+.notice {
+  height: 530px;
   box-sizing: border-box;
   font-size: 12px;
   font-family: 微软雅黑;
-  background: rgba(0, 0, 0, 0.5);
   border-radius: 5px;
   overflow: scroll;
+
+}
+
+.dialog {
+  background: rgba(255, 255, 255, 0.1);
+  left: 0;
+  right: 0;
+  height: 50px;
+  bottom: 0px;
+  position: absolute;
+  z-index: 999;
+  /* border-top: 1px solid #111; */
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.dialog-item {
+  margin-top: 10px;
+}
+
+.dialog input {
+  padding: 3px;
+  background: none;
+  border: 2px solid white;
+  border-radius: 2px;
+  height: 30px;
+  width: 70%;
+  float: left;
+  box-sizing: border-box;
+
+}
+
+.dialog button {
+  background: none;
+  color: yellow;
+  border: 2px solid white;
+  border-radius: 2px;
+  height: 30px;
 }
 
 .ranklist {
@@ -649,7 +739,6 @@ body {
   border-radius: 5px;
   padding: 20px;
   overflow: hidden;
-
 }
 
 .notice::-webkit-scrollbar {
@@ -657,6 +746,7 @@ body {
   height: 7px;
   border-radius: 4px;
   background-color: #f0f0f0;
+  display: none;
 }
 
 /*滚动条两端的箭头*/

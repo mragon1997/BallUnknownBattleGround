@@ -11,7 +11,9 @@ const list = {
     iron: 'armor',
     thor: 'armor',
     war: 'armor',
-    cap: 'armor'
+    cap: 'armor',
+    peppa:'armor',
+    auto:'armor'
   },
   num: {
     bullet: 30,
@@ -25,7 +27,9 @@ const list = {
     iron: 100,
     thor: 80,
     war: 60,
-    cap: 20
+    cap: 20,
+    peppa:9999,
+    auto:200
   },
   titles: {
     bullet: '子弹',
@@ -39,7 +43,9 @@ const list = {
     iron: '钢铁侠战甲',
     thor: '托尔战甲',
     war: '战争机器战甲',
-    cap: '美队战甲'
+    cap: '美队战甲',
+    peppa:'小猪佩奇战甲',
+    auto:'奥特曼战甲'
   },
   rate: {
     beer: 0.01,
@@ -52,7 +58,9 @@ const list = {
     iron: 0.01,
     thor: 0.01,
     war: 0.01,
-    cap: 0.01
+    cap: 0.01,
+    peppa:0,
+    auto:0
   }
 
 }
