@@ -11,6 +11,7 @@ const Audio = {
     this.gamestart = document.querySelector("#gamestart");
     this.iron = document.querySelector("#iron");
     this.end = document.querySelector("#end");
+    this.smash = document.querySelector("#smash");
   }
 }
 

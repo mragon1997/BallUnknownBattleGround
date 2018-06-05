@@ -1,5 +1,8 @@
 <template>
 <div class="game">
+  <audio id="smash">
+  <source src="./assets/audio/smash.mp3">
+  </audio>
   <audio id="gun">
    <source src="./assets/audio/gun.mp3">
    </audio>
@@ -79,6 +82,7 @@
 
     <!--游戏主面板-->
     <div class="main-content">
+      <img src="./assets/smash.gif" class="smash" v-show="isSmash">
       <!--游戏地图-->
       <div class="game-map">
         <div class="game-edge">
@@ -240,6 +244,7 @@ export default {
       iswin: false,
       isGameStart: false,
       isGameInit: false,
+      isSmash: false,
       timer: null
     }
   },
@@ -357,8 +362,26 @@ export default {
             name: 'auto',
             num: 200
           });
+        } else if (this.message == 'smash') {
+          this.notices.push(new Notice(this.player.name, '说：', this.message));
+          Audio.smash.play();
+          this.isSmash = true;
+          const _this = this;
+          this.enemys.forEach((enemy) => {
+            if (enemy.state == 'alive') {
+              enemy.state = 'death';
+              this.player.kill++;
+            }
+            this.notices.push(new Notice(this.player.name, '打了个响指,消灭了', enemy.name));
+          });
+
+          setTimeout(() => {
+            this.isend = true;
+            this.iswin = true;
+            this.gameEnd();
+            _this.scrollBottom();
+          }, 1200);
         }
-        this.notices.push(new Notice(this.player.name, '说：', this.message));
         this.message = '';
       }
     },
@@ -526,7 +549,6 @@ export default {
   },
   mounted() {
     Audio.audioInit();
-
     //do something after mounting vue instance
     const map = document.querySelector('.game-map');
     this.initPlayer();
@@ -808,6 +830,13 @@ body {
   position: relative;
   overflow: hidden;
   border-radius: 10px;
+}
+
+.smash {
+  position: absolute;
+  z-index: 999;
+  width: 600px;
+  height: 600px;
 }
 
 .game-map {
